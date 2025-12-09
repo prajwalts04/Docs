@@ -1,104 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Document Upload</title>
-
-<style>
-  body {
-    font-family: Arial;
-    background: #f2f2f2;
-    margin: 0;
-    padding: 0;
-  }
-  .container {
-    background: #fff;
-    width: 92%;
-    max-width: 420px;
-    padding: 20px;
-    margin: 30px auto;
-    border-radius: 12px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  }
-  h2 {
-    text-align: center;
-    margin-bottom: 15px;
-  }
-  label {
-    font-size: 14px;
-    display: block;
-    margin-top: 12px;
-  }
-  input[type="text"], input[type="tel"] {
-    width: 100%;
-    padding: 12px;
-    font-size: 16px;
-    margin-top: 6px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-  }
-  input[type="file"] {
-    margin-top: 10px;
-  }
-  button {
-    width: 100%;
-    padding: 12px;
-    margin-top: 18px;
-    border: none;
-    border-radius: 8px;
-    background: #4CAF50;
-    font-size: 17px;
-    color: white;
-  }
-  #progress-container {
-    width: 100%;
-    background: #ddd;
-    border-radius: 10px;
-    margin-top: 15px;
-    height: 14px;
-    display: none;
-  }
-  #progress-bar {
-    width: 0%;
-    height: 100%;
-    background: #4CAF50;
-    border-radius: 10px;
-  }
-  #status-text {
-    text-align: center;
-    margin-top: 10px;
-    font-size: 14px;
-    display: none;
-  }
-</style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document Upload</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: #fff;
+      width: 90%;
+      max-width: 420px;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    label {
+      font-size: 14px;
+      margin-top: 10px;
+      display: block;
+    }
+    input[type="text"], input[type="tel"] {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-top: 5px;
+    }
+    input[type="file"] {
+      margin-top: 10px;
+    }
+    button {
+      width: 100%;
+      margin-top: 15px;
+      padding: 12px;
+      font-size: 16px;
+      background: #4CAF50;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:disabled {
+      background: #9ccfa0;
+      cursor: not-allowed;
+    }
+    #progress-container {
+      margin-top: 15px;
+      width: 100%;
+      background: #ddd;
+      height: 14px;
+      border-radius: 8px;
+      overflow: hidden;
+      display: none;
+    }
+    #progress-bar {
+      width: 0%;
+      height: 100%;
+      background: #4CAF50;
+    }
+    #status-text {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 14px;
+      display: none;
+    }
+  </style>
 </head>
-
 <body>
-<div class="container">
+  <div class="container">
+    <h2>Upload Your Document</h2>
 
-  <h2>Upload Your Document</h2>
+    <label>Name *</label>
+    <input id="name" type="text" required>
 
-  <label>Name *</label>
-  <input id="name" type="text" required>
+    <label>Contact Number *</label>
+    <input id="contact" type="tel" required pattern="[0-9]{10}" maxlength="10">
 
-  <label>Contact Number *</label>
-  <input id="contact" type="tel" maxlength="10" required>
+    <label>Select PDF *</label>
+    <input id="file" type="file" accept="application/pdf" required>
 
-  <label>Select PDF *</label>
-  <input id="file" type="file" accept="application/pdf" required>
+    <button onclick="uploadFile()">Upload</button>
 
-  <button onclick="uploadFile()">Upload</button>
-
-  <div id="progress-container">
-    <div id="progress-bar"></div>
+    <div id="progress-container">
+      <div id="progress-bar"></div>
+    </div>
+    <div id="status-text"></div>
   </div>
 
-  <div id="status-text"></div>
-
-</div>
-
 <script>
-const uploadURL = "https://script.google.com/macros/s/AKfycbyn6zw19HiWmt58b4YTOhN28lNU9s13cel0BnAEHHztSBzjSuTfuN6R5p34BEtsyIOTqA/exec"; // Replace
+const uploadURL = "https://script.google.com/macros/s/AKfycbyn6zw19HiWmt58b4YTOhN28lNU9s13cel0BnAEHHztSBzjSuTfuN6R5p34BEtsyIOTqA/exec";
 
 function uploadFile() {
   let name = document.getElementById("name").value.trim();
@@ -106,44 +109,46 @@ function uploadFile() {
   let file = document.getElementById("file").files[0];
 
   if (!name || !contact || !file) {
-    alert("All fields are required.");
+    alert("Please fill all fields and upload a PDF.");
     return;
   }
-
-  if (!/^[0-9]{10}$/.test(contact)) {
+  if (!/^\d{10}$/.test(contact)) {
     alert("Enter a valid 10-digit contact number.");
     return;
   }
-
-  if (file.type !== "application/pdf") {
-    alert("Only PDF allowed.");
-    return;
-  }
-
+  
   let formData = new FormData();
   formData.append("name", name);
   formData.append("contact", contact);
   formData.append("file", file);
 
   let xhr = new XMLHttpRequest();
-  xhr.open("POST", uploadURL, true);
+  xhr.open("POST", uploadURL);
 
   let startTime = Date.now();
-
-  xhr.upload.onprogress = function (e) {
+  xhr.upload.addEventListener("progress", (e) => {
     if (e.lengthComputable) {
       document.getElementById("progress-container").style.display = "block";
       document.getElementById("status-text").style.display = "block";
 
       let percent = Math.round((e.loaded / e.total) * 100);
-      let elapsed = (Date.now() - startTime) / 1000;
-      let speed_MBps = (e.loaded / 1024 / 1024 / elapsed).toFixed(2);
+      let elapsed = (Date.now() - startTime) / 1000; // seconds
+      let speed = (e.loaded / 1024 / 1024) / elapsed; // MB/s
+      let speedText = speed.toFixed(2) + " MB/s";
 
       document.getElementById("progress-bar").style.width = percent + "%";
-      document.getElementById("status-text").innerText =
-        `Uploading... ${percent}% • ${speed_MBps} MB/s`;
+      document.getElementById("status-text").innerText = `Uploading... ${percent}%  |  ${speedText}`;
     }
-  };
+  });("progress", (e) => {
+    if (e.lengthComputable) {
+      document.getElementById("progress-container").style.display = "block";
+      document.getElementById("status-text").style.display = "block";
+
+      let percent = Math.round((e.loaded / e.total) * 100);
+      document.getElementById("progress-bar").style.width = percent + "%";
+      document.getElementById("status-text").innerText = `Uploading... ${percent}%`;
+    }
+  });
 
   xhr.onload = function () {
     if (xhr.status === 200) {
