@@ -1,200 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Document Submission Portal</title>
-<link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
-
-<style>
-/* --- Global Reset and Base Styles --- */
-body {
-  margin: 0;
-  background: #f7f7f9; /* Very light gray background */
-  font-family: 'Open Sans', sans-serif;
-  color: #333;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-}
-
-/* --- Container Styling --- */
-.container {
-  max-width: 450px;
-  width: 95%; /* Responsive width */
-  background: white;
-  padding: 30px;
-  border-radius: 4px; /* Sharper corners for a formal look */
-  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-  box-sizing: border-box;
-}
-
-/* --- Header/Title --- */
-h2 {
-  text-align: center;
-  color: #0056b3; /* Darker professional blue */
-  margin-bottom: 25px;
-  font-family: 'Merriweather', serif; /* Serif font for title formality */
-  font-weight: 700;
-  font-size: 26px;
-  border-bottom: 2px solid #e0e0e0;
-  padding-bottom: 10px;
-}
-
-/* --- Form Layout and Typography --- */
-label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 5px;
-  color: #555;
-  font-size: 14px;
-}
-
-/* --- Input Fields --- */
-input[type="text"], input[type="file"] {
-  width: 100%;
-  padding: 10px;
-  border-radius: 2px;
-  border: 1px solid #ccc;
-  margin-bottom: 20px;
-  font-size: 15px;
-  transition: border-color 0.2s;
-  box-sizing: border-box;
-}
-
-input[type="text"]:focus {
-  border-color: #0056b3;
-  box-shadow: 0 0 0 1px #0056b3;
-  outline: none;
-}
-
-/* Custom styling for file input area */
-input[type="file"] {
-  background-color: #f0f0f0; 
-  border-style: dashed; /* Dashed border for file selection */
-  cursor: pointer;
-  padding: 15px 10px;
-  border-color: #aaa;
-}
-
-/* --- Button Styling --- */
-button {
-  width: 100%;
-  padding: 13px;
-  background: #007bff; /* Action blue */
-  color: white;
-  font-size: 16px;
-  border-radius: 2px;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-  letter-spacing: 0.5px;
-  transition: background 0.3s;
-}
-
-button:hover:not(:disabled) {
-  background: #0056b3;
-}
-
-button:disabled {
-  background: #c3d9f7;
-  cursor: not-allowed;
-}
-
-/* --- Error and Message Styles --- */
-.error {
-  color: #cc0000; /* Darker red for errors */
-  font-size: 13px;
-  margin-top: -15px;
-  margin-bottom: 20px;
-  display: none;
-}
-
-#msg {
-  text-align: center;
-  margin-top: 25px;
-  font-weight: 700;
-  color: #1a6f00; 
-  padding: 12px;
-  border: 1px solid #d4edda;
-  background-color: #e9f5e9;
-  border-radius: 4px;
-}
-
-/* --- Progress Bar --- */
-#progressArea {
-  display: none;
-  margin-top: 25px;
-}
-
-.progressBg {
-  width: 100%;
-  background: #e0e0e0;
-  height: 8px; /* Very thin bar */
-  border-radius: 4px;
-}
-
-#progressBar {
-  width: 0%;
-  height: 8px;
-  background: #ffaa00; /* Orange for in-progress */
-  border-radius: 4px;
-  transition: width 0.4s ease;
-}
-
-#statusText {
-  text-align: center;
-  margin-top: 10px;
-  font-weight: 600;
-  color: #0056b3;
-  font-size: 13px;
-}
-
-/* --- Mobile Responsiveness --- */
-@media (max-width: 480px) {
-    .container {
-        padding: 20px;
-        width: 100%;
-        margin: 0;
-        box-shadow: none;
-    }
-}
-</style>
-</head>
-<body>
-
-<div class="container">
-
-<h2>Document Submission Portal</h2>
-
-<label for="name">Your Name *</label>
-<input id="name" type="text">
-<div id="nameErr" class="error">Name is required</div>
-
-<label for="contact">Contact Number *</label>
-<input id="contact" type="text">
-<div id="contactErr" class="error">Contact number is required</div>
-
-<label for="file">Select PDF Document *</label>
-<input id="file" type="file" accept="application/pdf">
-
-<button id="uploadBtn" disabled onclick="upload()">SUBMIT DOCUMENT</button>
-
-<div id="progressArea">
-  <div class="progressBg">
-    <div id="progressBar"></div>
-  </div>
-  <div id="statusText">Preparing upload...</div>
-</div>
-
-<div id="msg"></div>
-
-</div>
-
 <script>
-// The JavaScript code remains identical to the last working functional version 
-// (which handles validation and progress bar behavior correctly).
 const scriptURL = "https://script.google.com/macros/s/AKfycbyn6zw19HiWmt58b4YTOhN28lNU9s13cel0BnAEHHztSBzjSuTfuN6R5p34BEtsyIOTqA/exec";
 
 // --- CORE VALIDATION AND BUTTON CHECK ---
@@ -203,7 +7,13 @@ function check() {
   const contact = document.getElementById("contact").value.trim();
   const fileSelected = document.getElementById("file").files.length > 0;
   
-  document.getElementById("uploadBtn").disabled = !(name.length > 0 && contact.length > 0 && fileSelected);
+  // Custom contact number validation: must contain at least 10 digits
+  const isContactValid = contact.replace(/\D/g, '').length >= 10;
+  
+  // Enable button only if all fields are non-empty AND contact is valid
+  document.getElementById("uploadBtn").disabled = !(name.length > 0 && isContactValid && fileSelected);
+  
+  // Note: We don't change error visibility here, that's handled by event listeners below.
 }
 
 // --- EVENT LISTENERS INITIALIZATION (Validation logic) ---
@@ -213,33 +23,46 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('file');
     const nameErr = document.getElementById('nameErr');
     const contactErr = document.getElementById('contactErr');
+    
+    // Update the error message for contact validation
+    contactErr.innerText = "Contact number must be at least 10 digits.";
 
-    const setupInputListeners = (input, errorElement) => {
+    // Generic function to set up listeners for an input field
+    const setupInputListeners = (input, errorElement, validationFn) => {
+        // 1. Check for button status on every change (input event)
         input.addEventListener('input', () => {
             check();
-            if (input.value.trim().length > 0) {
+            // Hide the error immediately if user starts typing after it was shown
+            if (validationFn(input.value.trim())) {
                  errorElement.style.display = 'none';
             }
         });
         
+        // 2. Show the error only when the field is left empty OR invalid (blur event)
         input.addEventListener('blur', () => {
-            if (input.value.trim().length === 0) {
+            if (!validationFn(input.value.trim())) {
                 errorElement.style.display = 'block';
             } else {
                 errorElement.style.display = 'none';
             }
         });
     };
+    
+    // Validation functions
+    const isNameValid = (value) => value.length > 0;
+    const isContactFormatValid = (value) => value.replace(/\D/g, '').length >= 10;
 
-    setupInputListeners(nameInput, nameErr);
-    setupInputListeners(contactInput, contactErr);
+    // Attach listeners
+    setupInputListeners(nameInput, nameErr, isNameValid);
+    setupInputListeners(contactInput, contactErr, isContactFormatValid);
     fileInput.addEventListener('change', check); 
     
+    // Initial check to disable button on load
     check();
 });
 
 
-// --- UPLOAD FUNCTION (Progress Bar logic) ---
+// --- UPLOAD FUNCTION (Enhanced Speed/Progress logic) ---
 async function upload() {
   const name = document.getElementById("name").value.trim();
   const contact = document.getElementById("contact").value.trim();
@@ -248,30 +71,37 @@ async function upload() {
   const statusText = document.getElementById("statusText");
   const msgDiv = document.getElementById("msg");
 
-  if (!name || !contact || !file) {
-      alert("Validation failed. Please fill in all fields.");
+  // Input check for safety
+  if (!name || contact.replace(/\D/g, '').length < 10 || !file) {
+      // Re-trigger visual validation errors if the upload button was clicked prematurely
+      document.getElementById('nameErr').style.display = name ? 'none' : 'block';
+      document.getElementById('contactErr').style.display = contact.replace(/\D/g, '').length < 10 ? 'block' : 'none';
+      alert("Please ensure all fields are filled correctly, including a 10-digit contact number.");
       return;
   }
 
+  // --- PROGRESS BAR INITIALIZATION (Ensures progress is visible) ---
   document.getElementById("progressArea").style.display = "block";
   msgDiv.innerHTML = "";
   
-  progressBar.style.background = "#ffaa00"; 
+  progressBar.style.background = "#ffaa00"; // Orange
   progressBar.style.width = "0%";
-  statusText.innerText = "Preparing upload..."; 
+  statusText.innerText = "1. Starting Base64 conversion..."; // Explicit status step 1
   
   let progress = 0;
   let fake = setInterval(() => {
+    // Fake progress runs until 95%
     progress = Math.min(progress + Math.random() * 5, 95); 
     progressBar.style.width = progress + "%";
-    statusText.innerText = "Uploading... " + Math.round(progress) + "%";
+    statusText.innerText = `2. Uploading Data... ${Math.round(progress)}%`; // Explicit status step 2
     if (progress >= 95) clearInterval(fake);
   }, 150);
 
   try {
     const base64 = await toBase64(file);
     
-    statusText.innerText = "Sending data to server..."; 
+    // Status update while waiting for server response
+    statusText.innerText = "3. Awaiting Server Response..."; // Explicit status step 3
 
     const response = await fetch(scriptURL, {
       method: "POST",
@@ -286,7 +116,7 @@ async function upload() {
     
     // SUCCESS STATE 
     clearInterval(fake);
-    progressBar.style.background = "#00cc00"; // Bright green for final success
+    progressBar.style.background = "#00cc00"; // Success Green
     progressBar.style.width = "100%";
     statusText.innerText = "Upload Complete ✔";
     msgDiv.innerHTML = msg;
@@ -294,7 +124,7 @@ async function upload() {
   } catch(err) {
     // FAILURE STATE
     clearInterval(fake);
-    progressBar.style.background = "#cc0000"; // Dark red for failure
+    progressBar.style.background = "#cc0000"; // Error Red
     progressBar.style.width = "100%";
     statusText.innerText = "Upload Failed ❌";
     msgDiv.innerHTML = "Upload Failed ❌<br>" + err;
@@ -310,6 +140,3 @@ function toBase64(file) {
   });
 }
 </script>
-
-</body>
-</html>
