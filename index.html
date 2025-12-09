@@ -2,50 +2,51 @@
 <html lang="en">
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Secure PDF Upload</title>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+<title>Document Submission Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
 /* --- Global Reset and Base Styles --- */
 body {
   margin: 0;
-  background: #eef2f6;
-  font-family: 'Roboto', sans-serif;
+  background: #f7f7f9; /* Very light gray background */
+  font-family: 'Open Sans', sans-serif;
   color: #333;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  padding: 10px;
-  box-sizing: border-box;
 }
 
 /* --- Container Styling --- */
 .container {
-  max-width: 420px;
-  width: 100%;
+  max-width: 450px;
+  width: 95%; /* Responsive width */
   background: white;
   padding: 30px;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-  border-top: 5px solid #007bff;
+  border-radius: 4px; /* Sharper corners for a formal look */
+  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
   box-sizing: border-box;
-  margin: 20px 0;
 }
 
-/* --- Typography --- */
+/* --- Header/Title --- */
 h2 {
   text-align: center;
-  color: #007bff;
+  color: #0056b3; /* Darker professional blue */
   margin-bottom: 25px;
+  font-family: 'Merriweather', serif; /* Serif font for title formality */
   font-weight: 700;
-  font-size: 24px;
+  font-size: 26px;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 10px;
 }
 
+/* --- Form Layout and Typography --- */
 label {
   display: block;
-  font-weight: 500;
-  margin-bottom: 6px;
+  font-weight: 600;
+  margin-bottom: 5px;
   color: #555;
   font-size: 14px;
 }
@@ -53,120 +54,110 @@ label {
 /* --- Input Fields --- */
 input[type="text"], input[type="file"] {
   width: 100%;
-  padding: 12px;
-  border-radius: 8px;
+  padding: 10px;
+  border-radius: 2px;
   border: 1px solid #ccc;
-  margin-bottom: 15px;
-  font-size: 16px;
-  transition: border-color 0.3s, box-shadow 0.3s;
+  margin-bottom: 20px;
+  font-size: 15px;
+  transition: border-color 0.2s;
   box-sizing: border-box;
 }
 
 input[type="text"]:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+  border-color: #0056b3;
+  box-shadow: 0 0 0 1px #0056b3;
   outline: none;
 }
 
+/* Custom styling for file input area */
 input[type="file"] {
+  background-color: #f0f0f0; 
+  border-style: dashed; /* Dashed border for file selection */
   cursor: pointer;
-  padding: 10px;
-  background-color: #f9f9f9;
+  padding: 15px 10px;
+  border-color: #aaa;
 }
 
 /* --- Button Styling --- */
 button {
   width: 100%;
-  padding: 14px;
-  background: #007bff;
+  padding: 13px;
+  background: #007bff; /* Action blue */
   color: white;
   font-size: 16px;
-  border-radius: 8px;
+  border-radius: 2px;
   border: none;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s, transform 0.1s;
+  letter-spacing: 0.5px;
+  transition: background 0.3s;
 }
 
 button:hover:not(:disabled) {
   background: #0056b3;
 }
 
-button:active:not(:disabled) {
-  transform: translateY(1px);
-}
-
 button:disabled {
-  background: #b3d9ff;
+  background: #c3d9f7;
   cursor: not-allowed;
 }
 
 /* --- Error and Message Styles --- */
 .error {
-  color: #dc3545;
+  color: #cc0000; /* Darker red for errors */
   font-size: 13px;
-  margin-top: -10px;
-  margin-bottom: 15px;
-  display: none; /* Crucial: Hide errors by default */
+  margin-top: -15px;
+  margin-bottom: 20px;
+  display: none;
 }
 
 #msg {
   text-align: center;
-  margin-top: 20px;
+  margin-top: 25px;
   font-weight: 700;
-  color: #155724;
-  padding: 10px;
-  border: 1px solid #c3e6cb;
-  background-color: #d4edda;
-  border-radius: 8px;
+  color: #1a6f00; 
+  padding: 12px;
+  border: 1px solid #d4edda;
+  background-color: #e9f5e9;
+  border-radius: 4px;
 }
 
 /* --- Progress Bar --- */
 #progressArea {
   display: none;
-  margin-top: 20px;
-  padding: 0 5px;
+  margin-top: 25px;
 }
 
 .progressBg {
   width: 100%;
-  background: #e9ecef;
-  height: 10px;
-  border-radius: 5px;
-  overflow: hidden;
+  background: #e0e0e0;
+  height: 8px; /* Very thin bar */
+  border-radius: 4px;
 }
 
 #progressBar {
   width: 0%;
-  height: 10px;
-  background: #ffc107;
-  border-radius: 5px;
+  height: 8px;
+  background: #ffaa00; /* Orange for in-progress */
+  border-radius: 4px;
   transition: width 0.4s ease;
 }
 
 #statusText {
   text-align: center;
-  margin-top: 8px;
-  font-weight: 500;
-  color: #007bff;
-  font-size: 14px;
+  margin-top: 10px;
+  font-weight: 600;
+  color: #0056b3;
+  font-size: 13px;
 }
 
-/* --- Mobile Responsiveness (Small Screens) --- */
+/* --- Mobile Responsiveness --- */
 @media (max-width: 480px) {
     .container {
-        padding: 20px 15px;
-        border-radius: 0;
-        box-shadow: none;
+        padding: 20px;
+        width: 100%;
         margin: 0;
-        min-height: 100vh;
-    }
-    h2 {
-        font-size: 22px;
-    }
-    button {
-        font-size: 15px;
-        padding: 12px;
+        box-shadow: none;
     }
 }
 </style>
@@ -175,20 +166,20 @@ button:disabled {
 
 <div class="container">
 
-<h2>Secure PDF Upload</h2>
+<h2>Document Submission Portal</h2>
 
 <label for="name">Your Name *</label>
-<input id="name" type="text" placeholder="e.g., Jane Doe">
+<input id="name" type="text">
 <div id="nameErr" class="error">Name is required</div>
 
 <label for="contact">Contact Number *</label>
-<input id="contact" type="text" placeholder="e.g., 555-123-4567">
+<input id="contact" type="text">
 <div id="contactErr" class="error">Contact number is required</div>
 
-<label for="file">Select PDF *</label>
+<label for="file">Select PDF Document *</label>
 <input id="file" type="file" accept="application/pdf">
 
-<button id="uploadBtn" disabled onclick="upload()">Upload File</button>
+<button id="uploadBtn" disabled onclick="upload()">SUBMIT DOCUMENT</button>
 
 <div id="progressArea">
   <div class="progressBg">
@@ -202,6 +193,8 @@ button:disabled {
 </div>
 
 <script>
+// The JavaScript code remains identical to the last working functional version 
+// (which handles validation and progress bar behavior correctly).
 const scriptURL = "https://script.google.com/macros/s/AKfycbyn6zw19HiWmt58b4YTOhN28lNU9s13cel0BnAEHHztSBzjSuTfuN6R5p34BEtsyIOTqA/exec";
 
 // --- CORE VALIDATION AND BUTTON CHECK ---
@@ -210,11 +203,10 @@ function check() {
   const contact = document.getElementById("contact").value.trim();
   const fileSelected = document.getElementById("file").files.length > 0;
   
-  // Enable button only if both fields are non-empty and a file is selected
   document.getElementById("uploadBtn").disabled = !(name.length > 0 && contact.length > 0 && fileSelected);
 }
 
-// --- EVENT LISTENERS INITIALIZATION (Fixes Blank Page and Error Display) ---
+// --- EVENT LISTENERS INITIALIZATION (Validation logic) ---
 document.addEventListener('DOMContentLoaded', () => {
     const nameInput = document.getElementById('name');
     const contactInput = document.getElementById('contact');
@@ -222,18 +214,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const nameErr = document.getElementById('nameErr');
     const contactErr = document.getElementById('contactErr');
 
-    // Generic function to set up listeners for an input field
     const setupInputListeners = (input, errorElement) => {
-        // 1. Check for button status on every change (input event)
         input.addEventListener('input', () => {
             check();
-            // Hide the error immediately if user starts typing after it was shown
             if (input.value.trim().length > 0) {
                  errorElement.style.display = 'none';
             }
         });
         
-        // 2. Show the error only when the field is left empty (blur event)
         input.addEventListener('blur', () => {
             if (input.value.trim().length === 0) {
                 errorElement.style.display = 'block';
@@ -243,12 +231,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // Attach listeners
     setupInputListeners(nameInput, nameErr);
     setupInputListeners(contactInput, contactErr);
     fileInput.addEventListener('change', check); 
     
-    // Initial check to disable button on load
     check();
 });
 
@@ -262,24 +248,20 @@ async function upload() {
   const statusText = document.getElementById("statusText");
   const msgDiv = document.getElementById("msg");
 
-  // Input check for safety
   if (!name || !contact || !file) {
       alert("Validation failed. Please fill in all fields.");
       return;
   }
 
-  // --- PROGRESS BAR INITIALIZATION (Ensures progress is visible) ---
   document.getElementById("progressArea").style.display = "block";
   msgDiv.innerHTML = "";
   
-  // Explicitly set the initial state to 0% and yellow/orange color
-  progressBar.style.background = "#ffc107";
+  progressBar.style.background = "#ffaa00"; 
   progressBar.style.width = "0%";
   statusText.innerText = "Preparing upload..."; 
   
   let progress = 0;
   let fake = setInterval(() => {
-    // Fake progress runs until 95%
     progress = Math.min(progress + Math.random() * 5, 95); 
     progressBar.style.width = progress + "%";
     statusText.innerText = "Uploading... " + Math.round(progress) + "%";
@@ -289,7 +271,6 @@ async function upload() {
   try {
     const base64 = await toBase64(file);
     
-    // Status update while waiting for server response
     statusText.innerText = "Sending data to server..."; 
 
     const response = await fetch(scriptURL, {
@@ -303,9 +284,9 @@ async function upload() {
 
     const msg = await response.text();
     
-    // SUCCESS STATE (Runs ONLY after server responds)
+    // SUCCESS STATE 
     clearInterval(fake);
-    progressBar.style.background = "#28a745"; // Success Green
+    progressBar.style.background = "#00cc00"; // Bright green for final success
     progressBar.style.width = "100%";
     statusText.innerText = "Upload Complete ✔";
     msgDiv.innerHTML = msg;
@@ -313,7 +294,7 @@ async function upload() {
   } catch(err) {
     // FAILURE STATE
     clearInterval(fake);
-    progressBar.style.background = "#dc3545"; // Error Red
+    progressBar.style.background = "#cc0000"; // Dark red for failure
     progressBar.style.width = "100%";
     statusText.innerText = "Upload Failed ❌";
     msgDiv.innerHTML = "Upload Failed ❌<br>" + err;
