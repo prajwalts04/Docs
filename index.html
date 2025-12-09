@@ -139,16 +139,7 @@ function uploadFile() {
       document.getElementById("progress-bar").style.width = percent + "%";
       document.getElementById("status-text").innerText = `Uploading... ${percent}%  |  ${speedText}`;
     }
-  });("progress", (e) => {
-    if (e.lengthComputable) {
-      document.getElementById("progress-container").style.display = "block";
-      document.getElementById("status-text").style.display = "block";
-
-      let percent = Math.round((e.loaded / e.total) * 100);
-      document.getElementById("progress-bar").style.width = percent + "%";
-      document.getElementById("status-text").innerText = `Uploading... ${percent}%`;
-    }
-  });
+  
 
   xhr.onload = function () {
     if (xhr.status === 200) {
