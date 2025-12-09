@@ -2,122 +2,199 @@
 <html lang="en">
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Upload PDF</title>
+<title>Secure PDF Upload</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
 
 <style>
+/* --- Global Reset and Base Styles --- */
 body {
   margin: 0;
-  background: #f2f5ff;
-  font-family: Arial;
+  background: #eef2f6;
+  font-family: 'Roboto', sans-serif;
+  color: #333;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 10px; /* Add slight padding to body for very small screens */
+  box-sizing: border-box;
 }
 
+/* --- Container Styling --- */
 .container {
-  max-width: 450px;
+  max-width: 420px;
+  width: 100%; /* Ensure it takes full available width within max-width */
   background: white;
-  margin: 20px auto;
-  padding: 20px;
-  border-radius: 14px;
-  box-shadow: 0 4px 18px rgba(0,0,0,0.15);
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  border-top: 5px solid #007bff;
+  box-sizing: border-box;
+  margin: 20px 0; /* Add margin for vertical spacing */
 }
 
+/* --- Typography --- */
 h2 {
   text-align: center;
-  color: #0047b3;
+  color: #007bff;
+  margin-bottom: 25px;
+  font-weight: 700;
+  font-size: 24px;
 }
 
-label { font-weight: bold; }
+label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: #555;
+  font-size: 14px;
+}
 
-input {
+/* --- Input Fields --- */
+input[type="text"], input[type="file"] {
   width: 100%;
   padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #b7c4e6;
-  margin-top: 6px;
-  margin-bottom: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-bottom: 15px;
   font-size: 16px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  box-sizing: border-box;
 }
 
+input[type="text"]:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+  outline: none;
+}
+
+input[type="file"] {
+  cursor: pointer;
+  padding: 10px;
+  background-color: #f9f9f9;
+}
+
+/* --- Button Styling --- */
 button {
   width: 100%;
   padding: 14px;
-  background: #0055ff;
+  background: #007bff;
   color: white;
-  font-size: 18px;
-  border-radius: 10px;
+  font-size: 16px;
+  border-radius: 8px;
   border: none;
-  font-weight: bold;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.1s;
+}
+
+button:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+button:active:not(:disabled) {
+  transform: translateY(1px);
 }
 
 button:disabled {
-  background: #aabbff;
+  background: #b3d9ff;
+  cursor: not-allowed;
 }
 
+/* --- Error and Message Styles --- */
 .error {
-  color: red;
-  font-size: 14px;
+  color: #dc3545;
+  font-size: 13px;
+  margin-top: -10px;
+  margin-bottom: 15px;
   display: none;
-}
-
-#progressArea {
-  display: none;
-  margin-top: 20px;
-}
-
-.progressBg {
-  width: 100%;
-  background: #e0e6ff;
-  height: 15px;
-  border-radius: 8px;
-}
-
-#progressBar {
-  width: 0%;
-  height: 15px;
-  background: #00b347;
-  border-radius: 8px;
-  transition: width 0.23s ease;
-}
-
-#statusText {
-  text-align: center;
-  margin-top: 10px;
-  font-weight: bold;
-  color: #003d99;
 }
 
 #msg {
   text-align: center;
-  margin-top: 14px;
-  font-weight: bold;
-  color: green;
+  margin-top: 20px;
+  font-weight: 700;
+  color: #155724; /* Darker success text */
+  padding: 10px;
+  border: 1px solid #c3e6cb;
+  background-color: #d4edda; /* Success background */
+  border-radius: 8px;
+}
+
+/* --- Progress Bar --- */
+#progressArea {
+  display: none;
+  margin-top: 20px;
+  padding: 0 5px; /* Slight padding for inner progress elements */
+}
+
+.progressBg {
+  width: 100%;
+  background: #e9ecef;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden; /* Ensures bar stays within bounds */
+}
+
+#progressBar {
+  width: 0%;
+  height: 10px;
+  background: #ffc107; /* Changed to Yellow/Orange for 'In Progress' visual */
+  border-radius: 5px;
+  transition: width 0.4s ease; /* Slightly slower transition for smoothness */
+}
+
+#statusText {
+  text-align: center;
+  margin-top: 8px;
+  font-weight: 500;
+  color: #007bff;
+  font-size: 14px;
+}
+
+/* --- Mobile Responsiveness (Small Screens) --- */
+@media (max-width: 480px) {
+    .container {
+        padding: 20px 15px; /* Reduce padding on small devices */
+        border-radius: 0; /* Optional: Make it full width on the smallest screens */
+        box-shadow: none; /* Optional: Remove shadow on smallest screens */
+        margin: 0; /* Remove vertical margin */
+        min-height: 100vh; /* Make form fill the screen */
+    }
+    h2 {
+        font-size: 22px;
+    }
+    button {
+        font-size: 15px;
+        padding: 12px;
+    }
 }
 </style>
-
 </head>
 <body>
 
 <div class="container">
 
-<h2>Upload CIBIL Document</h2>
+<h2>Secure PDF Upload</h2>
 
-<label>Your Name *</label>
-<input id="name" type="text" oninput="check()">
+<label for="name">Your Name *</label>
+<input id="name" type="text" oninput="check()" placeholder="e.g., Jane Doe">
 <div id="nameErr" class="error">Name is required</div>
 
-<label>Contact Number *</label>
-<input id="contact" type="text" oninput="check()">
+<label for="contact">Contact Number *</label>
+<input id="contact" type="text" oninput="check()" placeholder="e.g., 555-123-4567">
 <div id="contactErr" class="error">Contact number is required</div>
 
-<label>Select PDF *</label>
+<label for="file">Select PDF *</label>
 <input id="file" type="file" accept="application/pdf" onchange="check()">
 
-<button id="uploadBtn" disabled onclick="upload()">Upload PDF</button>
+<button id="uploadBtn" disabled onclick="upload()">Upload File</button>
 
 <div id="progressArea">
   <div class="progressBg">
     <div id="progressBar"></div>
   </div>
-  <div id="statusText">Uploading...</div>
+  <div id="statusText">Preparing upload...</div>
 </div>
 
 <div id="msg"></div>
@@ -144,40 +221,57 @@ async function upload() {
   const file = document.getElementById("file").files[0];
 
   document.getElementById("progressArea").style.display = "block";
+  document.getElementById("msg").innerHTML = "";
 
+  // Set initial status and color
+  document.getElementById("progressBar").style.background = "#ffc107"; // Yellow/Orange
+  document.getElementById("statusText").innerText = "Uploading... 0%";
+  
   let progress = 0;
+  // Increase fake progress to 95% maximum (Psychological speed boost)
   let fake = setInterval(() => {
-    progress = Math.min(progress + Math.random() * 10, 90);
+    progress = Math.min(progress + Math.random() * 5, 95); 
     document.getElementById("progressBar").style.width = progress + "%";
     document.getElementById("statusText").innerText = "Uploading... " + Math.round(progress) + "%";
-    if (progress >= 90) clearInterval(fake);
-  }, 200);
+    if (progress >= 95) clearInterval(fake);
+  }, 150); // Slightly faster update interval (150ms)
 
-  const base64 = await toBase64(file);
+  try {
+    const base64 = await toBase64(file);
 
-  fetch(scriptURL, {
-    method: "POST",
-    body: JSON.stringify({
-      name: name,
-      contact: contact,
-      file: base64
-    })
-  })
-  .then(res => res.text())
-  .then(msg => {
+    const response = await fetch(scriptURL, {
+      method: "POST",
+      body: JSON.stringify({
+        name: name,
+        contact: contact,
+        file: base64
+      })
+    });
+
+    const msg = await response.text();
+    
+    clearInterval(fake);
+    // Final state styling
+    document.getElementById("progressBar").style.background = "#28a745"; // Success Green
     document.getElementById("progressBar").style.width = "100%";
-    document.getElementById("statusText").innerText = "Done ✔";
+    document.getElementById("statusText").innerText = "Upload Complete ✔";
     document.getElementById("msg").innerHTML = msg;
-  })
-  .catch(err => {
+    
+  } catch(err) {
+    clearInterval(fake);
+    // Failure state styling
+    document.getElementById("progressBar").style.background = "#dc3545"; // Error Red
+    document.getElementById("progressBar").style.width = "100%";
+    document.getElementById("statusText").innerText = "Upload Failed ❌";
     document.getElementById("msg").innerHTML = "Upload Failed ❌<br>" + err;
-  });
+  }
 }
 
 function toBase64(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result.split(",")[1]);
+    reader.onerror = error => reject(error);
     reader.readAsDataURL(file);
   });
 }
