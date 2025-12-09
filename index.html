@@ -1,185 +1,164 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Upload PDF</title>
-
-<style>
-body {
-  margin: 0;
-  background: #f2f5ff;
-  font-family: Arial;
-}
-
-.container {
-  max-width: 450px;
-  background: white;
-  margin: 20px auto;
-  padding: 20px;
-  border-radius: 14px;
-  box-shadow: 0 4px 18px rgba(0,0,0,0.15);
-}
-
-h2 {
-  text-align: center;
-  color: #0047b3;
-}
-
-label { font-weight: bold; }
-
-input {
-  width: 100%;
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #b7c4e6;
-  margin-top: 6px;
-  margin-bottom: 10px;
-  font-size: 16px;
-}
-
-button {
-  width: 100%;
-  padding: 14px;
-  background: #0055ff;
-  color: white;
-  font-size: 18px;
-  border-radius: 10px;
-  border: none;
-  font-weight: bold;
-}
-
-button:disabled {
-  background: #aabbff;
-}
-
-.error {
-  color: red;
-  font-size: 14px;
-  display: none;
-}
-
-#progressArea {
-  display: none;
-  margin-top: 20px;
-}
-
-.progressBg {
-  width: 100%;
-  background: #e0e6ff;
-  height: 15px;
-  border-radius: 8px;
-}
-
-#progressBar {
-  width: 0%;
-  height: 15px;
-  background: #00b347;
-  border-radius: 8px;
-  transition: width 0.23s ease;
-}
-
-#statusText {
-  text-align: center;
-  margin-top: 10px;
-  font-weight: bold;
-  color: #003d99;
-}
-
-#msg {
-  text-align: center;
-  margin-top: 14px;
-  font-weight: bold;
-  color: green;
-}
-</style>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document Upload</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: #fff;
+      width: 90%;
+      max-width: 420px;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    label {
+      font-size: 14px;
+      margin-top: 10px;
+      display: block;
+    }
+    input[type="text"], input[type="tel"] {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-top: 5px;
+    }
+    input[type="file"] {
+      margin-top: 10px;
+    }
+    button {
+      width: 100%;
+      margin-top: 15px;
+      padding: 12px;
+      font-size: 16px;
+      background: #4CAF50;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:disabled {
+      background: #9ccfa0;
+      cursor: not-allowed;
+    }
+    #progress-container {
+      margin-top: 15px;
+      width: 100%;
+      background: #ddd;
+      height: 14px;
+      border-radius: 8px;
+      overflow: hidden;
+      display: none;
+    }
+    #progress-bar {
+      width: 0%;
+      height: 100%;
+      background: #4CAF50;
+    }
+    #status-text {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 14px;
+      display: none;
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <h2>Upload Your Document</h2>
 
-<div class="container">
+    <label>Name *</label>
+    <input id="name" type="text" required>
 
-<h2>Upload Your CIBIL Document</h2>
+    <label>Contact Number *</label>
+    <input id="contact" type="tel" required pattern="[0-9]{10}" maxlength="10">
 
-<label>Your Name *</label>
-<input id="name" type="text" oninput="check()">
-<div id="nameErr" class="error">Name is required</div>
+    <label>Select PDF *</label>
+    <input id="file" type="file" accept="application/pdf" required>
 
-<label>Contact Number *</label>
-<input id="contact" type="text" oninput="check()">
-<div id="contactErr" class="error">Contact number is required</div>
+    <button onclick="uploadFile()">Upload</button>
 
-<label>Select PDF *</label>
-<input id="file" type="file" accept="application/pdf" onchange="check()">
-
-<button id="uploadBtn" disabled onclick="upload()">Upload PDF</button>
-
-<div id="progressArea">
-  <div class="progressBg">
-    <div id="progressBar"></div>
+    <div id="progress-container">
+      <div id="progress-bar"></div>
+    </div>
+    <div id="status-text"></div>
   </div>
-  <div id="statusText">Uploading...</div>
-</div>
-
-<div id="msg"></div>
-
-</div>
 
 <script>
-const scriptURL = "https://script.google.com/macros/s/AKfycbyn6zw19HiWmt58b4YTOhN28lNU9s13cel0BnAEHHztSBzjSuTfuN6R5p34BEtsyIOTqA/exec";
+const uploadURL = "https://script.google.com/macros/s/AKfycbyn6zw19HiWmt58b4YTOhN28lNU9s13cel0BnAEHHztSBzjSuTfuN6R5p34BEtsyIOTqA/exec";
 
-function check() {
-  const name = document.getElementById("name").value.trim();
-  const contact = document.getElementById("contact").value.trim();
-  const file = document.getElementById("file").files.length;
+function uploadFile() {
+  let name = document.getElementById("name").value.trim();
+  let contact = document.getElementById("contact").value.trim();
+  let file = document.getElementById("file").files[0];
 
-  document.getElementById("nameErr").style.display = name ? "none" : "block";
-  document.getElementById("contactErr").style.display = contact ? "none" : "block";
+  if (!name || !contact || !file) {
+    alert("Please fill all fields and upload a PDF.");
+    return;
+  }
+  if (!/^\d{10}$/.test(contact)) {
+    alert("Enter a valid 10-digit contact number.");
+    return;
+  }
+  
+  let formData = new FormData();
+  formData.append("name", name);
+  formData.append("contact", contact);
+  formData.append("file", file);
 
-  document.getElementById("uploadBtn").disabled = !(name && contact && file);
-}
+  let xhr = new XMLHttpRequest();
+  xhr.open("POST", uploadURL);
 
-async function upload() {
-  const name = document.getElementById("name").value.trim();
-  const contact = document.getElementById("contact").value.trim();
-  const file = document.getElementById("file").files[0];
+  let startTime = Date.now();
+  xhr.upload.addEventListener("progress", (e) => {
+    if (e.lengthComputable) {
+      document.getElementById("progress-container").style.display = "block";
+      document.getElementById("status-text").style.display = "block";
 
-  document.getElementById("progressArea").style.display = "block";
+      let percent = Math.round((e.loaded / e.total) * 100);
+      let elapsed = (Date.now() - startTime) / 1000; // seconds
+      let speed = (e.loaded / 1024 / 1024) / elapsed; // MB/s
+      let speedText = speed.toFixed(2) + " MB/s";
 
-  let progress = 0;
-  let fake = setInterval(() => {
-    progress = Math.min(progress + Math.random() * 10, 90);
-    document.getElementById("progressBar").style.width = progress + "%";
-    document.getElementById("statusText").innerText = "Uploading... " + Math.round(progress) + "%";
-    if (progress >= 90) clearInterval(fake);
-  }, 200);
+      document.getElementById("progress-bar").style.width = percent + "%";
+      document.getElementById("status-text").innerText = `Uploading... ${percent}%  |  ${speedText}`;
+    }
+  });("progress", (e) => {
+    if (e.lengthComputable) {
+      document.getElementById("progress-container").style.display = "block";
+      document.getElementById("status-text").style.display = "block";
 
-  const base64 = await toBase64(file);
-
-  fetch(scriptURL, {
-    method: "POST",
-    body: JSON.stringify({
-      name: name,
-      contact: contact,
-      file: base64
-    })
-  })
-  .then(res => res.text())
-  .then(msg => {
-    document.getElementById("progressBar").style.width = "100%";
-    document.getElementById("statusText").innerText = "Done ✔";
-    document.getElementById("msg").innerHTML = msg;
-  })
-  .catch(err => {
-    document.getElementById("msg").innerHTML = "Upload Failed ❌<br>" + err;
+      let percent = Math.round((e.loaded / e.total) * 100);
+      document.getElementById("progress-bar").style.width = percent + "%";
+      document.getElementById("status-text").innerText = `Uploading... ${percent}%`;
+    }
   });
-}
 
-function toBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result.split(",")[1]);
-    reader.readAsDataURL(file);
-  });
+  xhr.onload = function () {
+    if (xhr.status === 200) {
+      document.getElementById("status-text").innerText = "Upload Complete ✔";
+    } else {
+      document.getElementById("status-text").innerText = "Upload Failed ❌";
+    }
+  };
+
+  xhr.send(formData);
 }
 </script>
 
