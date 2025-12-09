@@ -1,179 +1,159 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Upload PDF</title>
-  <style>
-    body {
-      margin: 0;
-      background: #eef3ff;
-      font-family: Arial, sans-serif;
-    }
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Document Upload</title>
 
-    .container {
-      max-width: 450px;
-      margin: 20px auto;
-      background: #fff;
-      padding: 22px;
-      border-radius: 14px;
-      box-shadow: 0 3px 14px rgba(0,0,0,0.18);
-    }
-
-    h2 {
-      text-align: center;
-      color: #003d99;
-    }
-
-    label {
-      font-weight: 600;
-    }
-
-    input {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #b9c7e8;
-      border-radius: 10px;
-      margin-top: 6px;
-      margin-bottom: 8px;
-      background: #f7f9ff;
-    }
-
-    .error {
-      color: red;
-      font-size: 13px;
-      display: none;
-      margin-bottom: 10px;
-    }
-
-    button {
-      width: 100%;
-      padding: 14px;
-      background: #0055ff;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 17px;
-      font-weight: bold;
-      margin-top: 12px;
-    }
-
-    button:disabled {
-      background: #a7bdf8;
-    }
-
-    #progressArea {
-      margin-top: 20px;
-      display: none;
-    }
-
-    .progressBarBg {
-      width: 100%;
-      background: #dce4ff;
-      border-radius: 20px;
-      height: 14px;
-    }
-
-    #progressBar {
-      width: 0%;
-      height: 14px;
-      background: #00b341;
-      border-radius: 20px;
-      transition: width 0.3s ease;
-    }
-
-    #statusText {
-      text-align: center;
-      margin-top: 10px;
-      font-weight: bold;
-      color: #003d99;
-    }
-
-    #msg {
-      text-align: center;
-      margin-top: 15px;
-      font-weight: bold;
-      color: green;
-    }
-  </style>
+<style>
+  body {
+    font-family: Arial;
+    background: #f2f2f2;
+    margin: 0;
+    padding: 0;
+  }
+  .container {
+    background: #fff;
+    width: 92%;
+    max-width: 420px;
+    padding: 20px;
+    margin: 30px auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+  h2 {
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  label {
+    font-size: 14px;
+    display: block;
+    margin-top: 12px;
+  }
+  input[type="text"], input[type="tel"] {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    margin-top: 6px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+  }
+  input[type="file"] {
+    margin-top: 10px;
+  }
+  button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 18px;
+    border: none;
+    border-radius: 8px;
+    background: #4CAF50;
+    font-size: 17px;
+    color: white;
+  }
+  #progress-container {
+    width: 100%;
+    background: #ddd;
+    border-radius: 10px;
+    margin-top: 15px;
+    height: 14px;
+    display: none;
+  }
+  #progress-bar {
+    width: 0%;
+    height: 100%;
+    background: #4CAF50;
+    border-radius: 10px;
+  }
+  #status-text {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 14px;
+    display: none;
+  }
+</style>
 </head>
 
 <body>
-
 <div class="container">
 
-  <h2>Upload Your PDF</h2>
+  <h2>Upload Your Document</h2>
 
-  <label>Name</label>
-  <input type="text" id="name" oninput="validateForm()">
-  <div id="nameErr" class="error">Name is required</div>
+  <label>Name *</label>
+  <input id="name" type="text" required>
 
-  <label>Contact Number</label>
-  <input type="text" id="contact" oninput="validateForm()">
-  <div id="contactErr" class="error">Contact number is required</div>
+  <label>Contact Number *</label>
+  <input id="contact" type="tel" maxlength="10" required>
 
-  <label>Select PDF Document</label>
-  <input type="file" accept="application/pdf" id="file" onchange="validateForm()">
+  <label>Select PDF *</label>
+  <input id="file" type="file" accept="application/pdf" required>
 
-  <button id="uploadBtn" onclick="upload()" disabled>Upload PDF</button>
+  <button onclick="uploadFile()">Upload</button>
 
-  <div id="progressArea">
-    <div class="progressBarBg">
-      <div id="progressBar"></div>
-    </div>
-    <div id="statusText">Uploading...</div>
+  <div id="progress-container">
+    <div id="progress-bar"></div>
   </div>
 
-  <div id="msg"></div>
+  <div id="status-text"></div>
+
 </div>
 
 <script>
-function validateForm() {
-  const name = document.getElementById("name").value.trim();
-  const contact = document.getElementById("contact").value.trim();
-  const file = document.getElementById("file").files.length;
+const uploadURL = "YOUR_SCRIPT_URL_HERE"; // Replace
 
-  document.getElementById("nameErr").style.display = name ? "none" : "block";
-  document.getElementById("contactErr").style.display = contact ? "none" : "block";
+function uploadFile() {
+  let name = document.getElementById("name").value.trim();
+  let contact = document.getElementById("contact").value.trim();
+  let file = document.getElementById("file").files[0];
 
-  document.getElementById("uploadBtn").disabled = !(name && contact && file);
-}
+  if (!name || !contact || !file) {
+    alert("All fields are required.");
+    return;
+  }
 
-function upload() {
-  const name = document.getElementById("name").value.trim();
-  const contact = document.getElementById("contact").value.trim();
-  const file = document.getElementById("file").files[0];
+  if (!/^[0-9]{10}$/.test(contact)) {
+    alert("Enter a valid 10-digit contact number.");
+    return;
+  }
 
-  document.getElementById("progressArea").style.display = "block";
-  const bar = document.getElementById("progressBar");
-  const statusText = document.getElementById("statusText");
+  if (file.type !== "application/pdf") {
+    alert("Only PDF allowed.");
+    return;
+  }
 
-  let progress = 0;
+  let formData = new FormData();
+  formData.append("name", name);
+  formData.append("contact", contact);
+  formData.append("file", file);
 
-  const fake = setInterval(() => {
-    progress = Math.min(progress + Math.random() * 10, 90);
-    bar.style.width = progress + "%";
-    statusText.innerHTML = "Uploading... " + Math.round(progress) + "%";
+  let xhr = new XMLHttpRequest();
+  xhr.open("POST", uploadURL, true);
 
-    if (progress >= 90) clearInterval(fake);
-  }, 200);
+  let startTime = Date.now();
 
-  const reader = new FileReader();
+  xhr.upload.onprogress = function (e) {
+    if (e.lengthComputable) {
+      document.getElementById("progress-container").style.display = "block";
+      document.getElementById("status-text").style.display = "block";
 
-  reader.onload = function(e) {
-    const base64File = e.target.result.split(",")[1];
+      let percent = Math.round((e.loaded / e.total) * 100);
+      let elapsed = (Date.now() - startTime) / 1000;
+      let speed_MBps = (e.loaded / 1024 / 1024 / elapsed).toFixed(2);
 
-    google.script.run.withSuccessHandler(msg => {
-      bar.style.width = "100%";
-      statusText.innerHTML = "Upload Completed ✔";
-      document.getElementById("msg").innerHTML = msg;
-    }).uploadFile({
-      name: name,
-      contact: contact,
-      file: base64File
-    });
+      document.getElementById("progress-bar").style.width = percent + "%";
+      document.getElementById("status-text").innerText =
+        `Uploading... ${percent}% • ${speed_MBps} MB/s`;
+    }
   };
 
-  reader.readAsDataURL(file);
+  xhr.onload = function () {
+    if (xhr.status === 200) {
+      document.getElementById("status-text").innerText = "Upload Complete ✔";
+    } else {
+      document.getElementById("status-text").innerText = "Upload Failed ❌";
+    }
+  };
+
+  xhr.send(formData);
 }
 </script>
 
