@@ -1,50 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Secure PDF Upload</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+
+<style>
+/* --- Global Reset and Base Styles --- */
+body {
+  margin: 0;
+  background: #eef2f6;
+  font-family: 'Roboto', sans-serif;
+  color: #333;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+/* --- Container Styling --- */
+.container {
+  max-width: 420px;
+  width: 100%;
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  border-top: 5px solid #007bff;
+  box-sizing: border-box;
+  margin: 20px 0;
+}
+
+/* --- Typography --- */
+h2 {
+  text-align: center;
+  color: #007bff;
+  margin-bottom: 25px;
+  font-weight: 700;
+  font-size: 24px;
+}
+
+label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: #555;
+  font-size: 14px;
+}
+
+/* --- Input Fields --- */
+input[type="text"], input[type="file"] {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-bottom: 15px;
+  font-size: 16px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  box-sizing: border-box;
+}
+
+input[type="text"]:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+  outline: none;
+}
+
+input[type="file"] {
+  cursor: pointer;
+  padding: 10px;
+  background-color: #f9f9f9;
+}
+
+/* --- Button Styling --- */
+button {
+  width: 100%;
+  padding: 14px;
+  background: #007bff;
+  color: white;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.1s;
+}
+
+button:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+button:disabled {
+  background: #b3d9ff;
+  cursor: not-allowed;
+}
+
+/* --- Error and Message Styles --- */
+.error {
+  color: #dc3545;
+  font-size: 13px;
+  margin-top: -10px;
+  margin-bottom: 15px;
+  /* Crucial fix: Hide errors by default on load */
+  display: none; 
+}
+
+#msg {
+  text-align: center;
+  margin-top: 20px;
+  font-weight: 700;
+  color: #155724;
+  padding: 10px;
+  border: 1px solid #c3e6cb;
+  background-color: #d4edda;
+  border-radius: 8px;
+}
+
+/* --- Progress Bar --- */
+#progressArea {
+  display: none;
+  margin-top: 20px;
+  padding: 0 5px;
+}
+
+.progressBg {
+  width: 100%;
+  background: #e9ecef;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+#progressBar {
+  width: 0%;
+  height: 10px;
+  background: #ffc107;
+  border-radius: 5px;
+  transition: width 0.4s ease;
+}
+
+#statusText {
+  text-align: center;
+  margin-top: 8px;
+  font-weight: 500;
+  color: #007bff;
+  font-size: 14px;
+}
+
+/* --- Mobile Responsiveness (Small Screens) --- */
+@media (max-width: 480px) {
+    .container {
+        padding: 20px 15px;
+        border-radius: 0;
+        box-shadow: none;
+        margin: 0;
+        min-height: 100vh;
+    }
+    h2 {
+        font-size: 22px;
+    }
+    button {
+        font-size: 15px;
+        padding: 12px;
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h2>Secure PDF Upload</h2>
+
+<label for="name">Your Name *</label>
+<input id="name" type="text" placeholder="e.g., Jane Doe">
+<div id="nameErr" class="error">Name is required</div>
+
+<label for="contact">Contact Number *</label>
+<input id="contact" type="text" placeholder="e.g., 555-123-4567">
+<div id="contactErr" class="error">Contact number is required</div>
+
+<label for="file">Select PDF *</label>
+<input id="file" type="file" accept="application/pdf">
+
+<button id="uploadBtn" disabled onclick="upload()">Upload File</button>
+
+<div id="progressArea">
+  <div class="progressBg">
+    <div id="progressBar"></div>
+  </div>
+  <div id="statusText">Preparing upload...</div>
+</div>
+
+<div id="msg"></div>
+
+</div>
+
 <script>
 const scriptURL = "https://script.google.com/macros/s/AKfycbyn6zw19HiWmt58b4YTOhN28lNU9s13cel0BnAEHHztSBzjSuTfuN6R5p34BEtsyIOTqA/exec";
 
-// Function to check validation and enable/disable button
+// --- CORE VALIDATION AND BUTTON CHECK ---
 function check() {
-  const nameInput = document.getElementById("name");
-  const contactInput = document.getElementById("contact");
-  const fileInput = document.getElementById("file");
+  const name = document.getElementById("name").value.trim();
+  const contact = document.getElementById("contact").value.trim();
+  const fileSelected = document.getElementById("file").files.length > 0;
   
-  const name = nameInput.value.trim();
-  const contact = contactInput.value.trim();
-  const fileSelected = fileInput.files.length > 0;
-
-  // Only show errors if the field is empty AND has been interacted with (or is currently focused)
-  const isNameValid = name.length > 0;
-  const isContactValid = contact.length > 0;
-  
-  // Hide all error messages initially or when valid
-  document.getElementById("nameErr").style.display = "none";
-  document.getElementById("contactErr").style.display = "none";
-
-  // Re-enable the button if all criteria are met
-  document.getElementById("uploadBtn").disabled = !(isNameValid && isContactValid && fileSelected);
+  // Enable button only if both fields are non-empty and a file is selected
+  document.getElementById("uploadBtn").disabled = !(name.length > 0 && contact.length > 0 && fileSelected);
 }
 
-// Function to show individual field errors if the field is invalid and has lost focus
-function validateField(inputElement, errorElementId, validationFn) {
-    inputElement.addEventListener('blur', () => {
-        const errorElement = document.getElementById(errorElementId);
-        if (validationFn(inputElement.value.trim())) {
-            errorElement.style.display = 'none';
-        } else {
-            errorElement.style.display = 'block';
-        }
-    });
-}
-
-// Attach the validation listeners to trigger on blur (when field loses focus)
+// --- EVENT LISTENERS INITIALIZATION (Fixes Blank Page & Initial Error Issue) ---
 document.addEventListener('DOMContentLoaded', () => {
-    validateField(document.getElementById('name'), 'nameErr', value => value.length > 0);
-    validateField(document.getElementById('contact'), 'contactErr', value => value.length > 0);
+    const nameInput = document.getElementById('name');
+    const contactInput = document.getElementById('contact');
+    const fileInput = document.getElementById('file');
+
+    // Function to handle validation display on blur (losing focus)
+    const handleValidation = (input, errorId) => {
+        const errorElement = document.getElementById(errorId);
+        input.addEventListener('blur', () => {
+            if (input.value.trim().length === 0) {
+                errorElement.style.display = 'block';
+            } else {
+                errorElement.style.display = 'none';
+            }
+            check(); // Re-check button status after validation
+        });
+        
+        // Also check on every key stroke to update button status
+        input.addEventListener('input', check);
+    };
+
+    // Attach listeners
+    handleValidation(nameInput, 'nameErr');
+    handleValidation(contactInput, 'contactErr');
+    fileInput.addEventListener('change', check); // Check when file selection changes
     
-    // Initial check to disable button
+    // Initial check to disable button on load
     check();
 });
 
 
+// --- UPLOAD FUNCTION ---
 async function upload() {
   const name = document.getElementById("name").value.trim();
   const contact = document.getElementById("contact").value.trim();
@@ -53,17 +256,21 @@ async function upload() {
   const statusText = document.getElementById("statusText");
   const msgDiv = document.getElementById("msg");
 
+  // Basic check to prevent upload if button was incorrectly enabled
+  if (!name || !contact || !file) {
+      alert("Please fill in all required fields and select a PDF.");
+      return;
+  }
+
   document.getElementById("progressArea").style.display = "block";
   msgDiv.innerHTML = "";
   
-  // Reset initial progress
-  progressBar.style.background = "#ffc107"; // Yellow/Orange
+  progressBar.style.background = "#ffc107";
   progressBar.style.width = "0%";
   statusText.innerText = "Preparing upload...";
   
   let progress = 0;
   let fake = setInterval(() => {
-    // Progress bar moves until 95% while waiting for I/O operations
     progress = Math.min(progress + Math.random() * 5, 95); 
     progressBar.style.width = progress + "%";
     statusText.innerText = "Uploading... " + Math.round(progress) + "%";
@@ -72,8 +279,8 @@ async function upload() {
 
   try {
     const base64 = await toBase64(file);
-
-    // After base64 conversion (which can take time for large files), update status
+    
+    // Update status while waiting for server response
     statusText.innerText = "Sending data to server..."; 
 
     const response = await fetch(scriptURL, {
@@ -87,17 +294,17 @@ async function upload() {
 
     const msg = await response.text();
     
-    // --- SUCCESS STATE: This runs ONLY after the fetch request and server response ---
+    // SUCCESS STATE
     clearInterval(fake);
-    progressBar.style.background = "#28a745"; // Success Green
+    progressBar.style.background = "#28a745"; 
     progressBar.style.width = "100%";
     statusText.innerText = "Upload Complete ✔";
-    msgDiv.innerHTML = msg; // This will show "Uploaded successfully" or the server's response
+    msgDiv.innerHTML = msg;
     
   } catch(err) {
-    // --- FAILURE STATE ---
+    // FAILURE STATE
     clearInterval(fake);
-    progressBar.style.background = "#dc3545"; // Error Red
+    progressBar.style.background = "#dc3545";
     progressBar.style.width = "100%";
     statusText.innerText = "Upload Failed ❌";
     msgDiv.innerHTML = "Upload Failed ❌<br>" + err;
@@ -113,3 +320,6 @@ function toBase64(file) {
   });
 }
 </script>
+
+</body>
+</html>
