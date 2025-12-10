@@ -2,208 +2,367 @@
 <html lang="en">
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Document Submission Portal</title>
-<link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+<title>CIBIL Document Submission</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 
 <style>
-/* --- CSS is retained from the previous design --- */
-body {
-  margin: 0;
-  background: #f7f7f9;
-  font-family: 'Open Sans', sans-serif;
-  color: #333;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
+/* --- NEW MODERN CSS (RETAINED) --- */
+:root {
+  --primary-color: #3b82f6; /* Blue 500 */
+  --secondary-color: #10b981; /* Emerald 500 (Success) */
+  --error-color: #ef4444; /* Red 500 */
+  --bg-light: #f9fafb;
+  --text-dark: #1f2937;
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-.container {
-  max-width: 450px;
-  width: 95%;
-  background: white;
-  padding: 30px;
-  border-radius: 4px;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+body {
+  margin: 0;
+  background: var(--bg-light);
+  font-family: 'Poppins', sans-serif;
+  color: var(--text-dark);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 40px 15px;
   box-sizing: border-box;
 }
 
-h2 {
+.card-container {
+  max-width: 480px;
+  width: 100%;
+  background: white;
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.header {
+  background: var(--primary-color);
+  color: white;
+  padding: 30px 25px;
   text-align: center;
-  color: #0056b3;
-  margin-bottom: 25px;
-  font-family: 'Merriweather', serif;
+}
+
+.header h2 {
+  margin: 0;
   font-weight: 700;
-  font-size: 26px;
-  border-bottom: 2px solid #e0e0e0;
-  padding-bottom: 10px;
+  font-size: 24px;
+  letter-spacing: 0.5px;
+}
+
+.header p {
+  margin-top: 5px;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.form-body {
+  padding: 25px;
+}
+
+/* --- Form Fields --- */
+.form-group {
+  margin-bottom: 25px;
 }
 
 label {
   display: block;
   font-weight: 600;
-  margin-bottom: 5px;
-  color: #555;
+  margin-bottom: 8px;
+  color: var(--text-dark);
   font-size: 14px;
 }
 
-input[type="text"], input[type="file"] {
+.input-field {
   width: 100%;
-  padding: 10px;
-  border-radius: 2px;
-  border: 1px solid #ccc;
-  margin-bottom: 20px;
+  padding: 12px 15px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db; /* Gray 300 */
   font-size: 15px;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
   box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
 }
 
-input[type="text"]:focus {
-  border-color: #0056b3;
-  box-shadow: 0 0 0 1px #0056b3;
+.input-field:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25); /* Blue 500 with alpha */
   outline: none;
 }
 
-input[type="file"] {
-  background-color: #f0f0f0;
-  border-style: dashed;
+/* --- File Input Styling --- */
+.file-upload-box {
+  border: 2px dashed #9ca3af; /* Gray 400 */
+  border-radius: 6px;
+  padding: 20px;
+  text-align: center;
   cursor: pointer;
-  padding: 15px 10px;
-  border-color: #aaa;
+  transition: border-color 0.3s, background-color 0.3s;
+  position: relative;
 }
 
-button {
+.file-upload-box:hover {
+  border-color: var(--primary-color);
+  background-color: #eff6ff; /* Blue 50 */
+}
+
+.file-icon {
+  font-size: 32px;
+  color: var(--primary-color);
+  margin-bottom: 10px;
+}
+
+.file-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.file-info {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 5px;
+}
+
+#file {
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  padding: 13px;
-  background: #007bff;
+  height: 100%;
+  cursor: pointer;
+}
+
+#fileNameDisplay {
+    margin-top: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--secondary-color);
+    display: flex; /* Use flex to align name and size */
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    display: none; /* Initially hidden */
+}
+
+#fileSize {
+    font-weight: 400;
+    font-size: 13px;
+    color: #6b7280;
+    background: #e5e7eb;
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+
+/* --- Button Styling --- */
+.submit-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--primary-color);
   color: white;
   font-size: 16px;
-  border-radius: 2px;
+  border-radius: 6px;
   border: none;
   font-weight: 600;
   cursor: pointer;
   letter-spacing: 0.5px;
-  transition: background 0.3s;
+  transition: background 0.3s, transform 0.1s;
 }
 
-button:hover:not(:disabled) {
-  background: #0056b3;
+.submit-btn:hover:not(:disabled) {
+  background: #2563eb; /* Blue 600 */
 }
 
-button:disabled {
-  background: #c3d9f7;
+.submit-btn:active:not(:disabled) {
+  transform: scale(0.99);
+}
+
+.submit-btn:disabled {
+  background: #93c5fd; /* Blue 300 */
   cursor: not-allowed;
 }
 
+/* --- Error/Message/Progress --- */
 .error {
-  color: #cc0000;
+  color: var(--error-color);
   font-size: 13px;
-  margin-top: -15px;
-  margin-bottom: 20px;
+  margin-top: 6px;
   display: none;
 }
 
 #msg {
   text-align: center;
-  margin-top: 25px;
-  font-weight: 700;
-  color: #1a6f00;
-  padding: 12px;
-  border: 1px solid #d4edda;
-  background-color: #e9f5e9;
-  border-radius: 4px;
+  margin-top: 30px;
+  font-weight: 600;
+  padding: 15px;
+  border-radius: 8px;
+  background-color: #ecfdf5; /* Success light bg */
+  color: var(--secondary-color);
+  border: 1px solid #a7f3d0;
+  display: none;
 }
 
 #progressArea {
+  margin-top: 30px;
+  padding: 15px;
+  background-color: #f3f4f6;
+  border-radius: 8px;
   display: none;
-  margin-top: 25px;
 }
 
 .progressBg {
   width: 100%;
-  background: #e0e0e0;
-  height: 8px;
-  border-radius: 4px;
+  background: #e5e7eb;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
 }
 
 #progressBar {
+  height: 10px;
+  background: var(--primary-color);
   width: 0%;
-  height: 8px;
-  background: #ffaa00;
-  border-radius: 4px;
+  border-radius: 5px;
   transition: width 0.4s ease;
 }
 
 #statusText {
-  text-align: center;
   margin-top: 10px;
-  font-weight: 600;
-  color: #0056b3;
-  font-size: 13px;
+  font-weight: 500;
+  color: #4b5563;
+  font-size: 14px;
 }
 
-@media (max-width: 480px) {
-    .container {
-        padding: 20px;
-        width: 100%;
-        margin: 0;
+/* Mobile adjustments */
+@media (max-width: 600px) {
+    body {
+        padding: 0;
+        align-items: flex-start;
+    }
+    .card-container {
+        border-radius: 0;
         box-shadow: none;
+        max-width: 100%;
+    }
+    .header {
+        padding: 25px 20px;
+    }
+    .form-body {
+        padding: 20px;
     }
 }
 </style>
 </head>
 <body>
 
-<div class="container">
+<div class="card-container">
 
-<h2>Document Submission Portal</h2>
+    <div class="header">
+        <h2><i class="fas fa-file-upload"></i> CIBIL Document Submission</h2>
+        <p>Please provide your details and upload the required PDF file for your CIBIL process.</p>
+    </div>
 
-<label for="name">Your Name *</label>
-<input id="name" type="text" oninput="validateAndCheck('name', 'nameErr')">
-<div id="nameErr" class="error">Name is required</div>
+    <div class="form-body">
 
-<label for="contact">Contact Number *</label>
-<input id="contact" type="text" oninput="validateAndCheck('contact', 'contactErr')">
-<div id="contactErr" class="error">Contact number must be at least 10 digits.</div>
+        <div class="form-group">
+            <label for="name"><i class="fas fa-user"></i> Your Full Name</label>
+            <input id="name" type="text" class="input-field" oninput="validateAndCheck('name', 'nameErr')">
+            <div id="nameErr" class="error">Name is required.</div>
+        </div>
 
-<label for="file">Select PDF Document *</label>
-<input id="file" type="file" accept="application/pdf" onchange="check()">
+        <div class="form-group">
+            <label for="contact"><i class="fas fa-phone-alt"></i> Contact Number</label>
+            <input id="contact" type="tel" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" class="input-field" oninput="cleanContactInput(this); validateAndCheck('contact', 'contactErr')">
+            <div id="contactErr" class="error">Contact number must be exactly 10 digits.</div>
+        </div>
 
-<button id="uploadBtn" disabled onclick="upload()">SUBMIT DOCUMENT</button>
+        <div class="form-group">
+            <label for="file"><i class="fas fa-file-pdf"></i> Select PDF Document</label>
+            <div class="file-upload-box">
+                <div class="file-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="file-text">Click or Drag file here</div>
+                <div class="file-info">Only **.PDF** format accepted (Max 10MB)</div>
+                <input id="file" type="file" accept="application/pdf" onchange="check()">
+            </div>
+            <div id="fileNameDisplay">
+                <span>Selected File:</span>
+                <span id="fileSize"></span>
+            </div>
+        </div>
 
-<div id="progressArea">
-  <div class="progressBg">
-    <div id="progressBar"></div>
-  </div>
-  <div id="statusText">Preparing upload...</div>
-</div>
+        <button id="uploadBtn" class="submit-btn" disabled onclick="upload()">
+            <i class="fas fa-paper-plane"></i> SUBMIT DOCUMENT
+        </button>
 
-<div id="msg"></div>
+        <div id="progressArea">
+          <div class="progressBg">
+            <div id="progressBar"></div>
+          </div>
+          <div id="statusText">Preparing upload...</div>
+        </div>
+
+        <div id="msg"></div>
+
+    </div>
 
 </div>
 
 <script>
 const scriptURL = "https://script.google.com/macros/s/AKfycbyn6zw19HiWmt58b4YTOhN28lNU9s13cel0BnAEHHztSBzjSuTfuN6R5p34BEtsyIOTqA/exec";
 
-// Helper validation functions
+// --- NEW HELPER FUNCTION: Formats bytes into human-readable size (KB, MB) ---
+function formatBytes(bytes, decimals = 2) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
+
+// --- Contact Input Cleaning (Retained) ---
+function cleanContactInput(input) {
+    input.value = input.value.replace(/\D/g, '').substring(0, 10);
+}
+
+// Helper validation functions (Retained)
 const isNameValid = (value) => value.length > 0;
-const isContactFormatValid = (value) => value.replace(/\D/g, '').length >= 10;
+const isContactFormatValid = (value) => value.replace(/\D/g, '').length === 10;
 
 // --- CORE VALIDATION AND BUTTON CHECK ---
 function check() {
   const name = document.getElementById("name").value.trim();
   const contact = document.getElementById("contact").value.trim();
-  const fileSelected = document.getElementById("file").files.length > 0;
+  const fileInput = document.getElementById("file");
+  const fileNameDisplay = document.getElementById('fileNameDisplay');
+  const fileSizeDisplay = document.getElementById('fileSize');
+  
+  const fileSelected = fileInput.files.length > 0;
   
   const isNameOk = isNameValid(name);
   const isContactOk = isContactFormatValid(contact);
   
+  // --- UPDATED: Display file name and size ---
+  if (fileSelected) {
+      const file = fileInput.files[0];
+      fileNameDisplay.querySelector('span:first-child').textContent = `Selected File: ${file.name}`;
+      fileSizeDisplay.textContent = formatBytes(file.size); // Format and display size
+      fileNameDisplay.style.display = 'flex'; // Show both elements
+  } else {
+      fileNameDisplay.style.display = 'none';
+      fileSizeDisplay.textContent = '';
+  }
+
   // Enable button only if all validation passes
   document.getElementById("uploadBtn").disabled = !(isNameOk && isContactOk && fileSelected);
 }
 
-// --- SIMPLIFIED INLINE VALIDATION & ERROR DISPLAY ---
+// --- SIMPLIFIED INLINE VALIDATION & ERROR DISPLAY (Retained) ---
 function validateAndCheck(inputId, errorId) {
     const input = document.getElementById(inputId);
     const errorElement = document.getElementById(errorId);
@@ -212,38 +371,43 @@ function validateAndCheck(inputId, errorId) {
     if (inputId === 'name') {
         isValid = isNameValid(input.value.trim());
     } else if (inputId === 'contact') {
+        cleanContactInput(input);
         isValid = isContactFormatValid(input.value.trim());
     }
     
-    // Show error only if field is empty/invalid AND it's been focused/typed in
     if (!isValid) {
-        // Use a slight delay to allow the blur/focus change to happen smoothly
-        setTimeout(() => {
-            if (input.value.trim().length === 0) { // Check for empty only on blur
-                 errorElement.style.display = 'block';
-            } else if (inputId === 'contact' && !isContactFormatValid(input.value.trim())) {
-                 errorElement.style.display = 'block';
-            }
-        }, 100);
+        if (inputId === 'contact' || input.value.trim().length > 0) {
+            errorElement.style.display = 'block';
+        } else {
+            errorElement.style.display = 'none';
+        }
     } else {
         errorElement.style.display = 'none';
     }
 
-    check(); // Always check the button status
+    check(); 
 }
 
-// --- ATTACH BLUR LISTENERS (For final error check when leaving a field) ---
+// --- ATTACH BLUR LISTENERS (Retained) ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Attach blur listeners to trigger the validation logic when the user leaves the field
-    document.getElementById('name').addEventListener('blur', () => validateAndCheck('name', 'nameErr'));
-    document.getElementById('contact').addEventListener('blur', () => validateAndCheck('contact', 'contactErr'));
+    document.getElementById('name').addEventListener('blur', () => {
+        validateAndCheck('name', 'nameErr');
+        if (!isNameValid(document.getElementById('name').value.trim())) {
+             document.getElementById('nameErr').style.display = 'block';
+        }
+    });
+    document.getElementById('contact').addEventListener('blur', () => {
+        validateAndCheck('contact', 'contactErr');
+        if (!isContactFormatValid(document.getElementById('contact').value.trim())) {
+             document.getElementById('contactErr').style.display = 'block';
+        }
+    });
 
-    // Initial check to disable button on load
     check();
 });
 
 
-// --- UPLOAD FUNCTION (Progress Bar logic) ---
+// --- UPLOAD FUNCTION (Retained) ---
 async function upload() {
   const name = document.getElementById("name").value.trim();
   const contact = document.getElementById("contact").value.trim();
@@ -252,35 +416,36 @@ async function upload() {
   const statusText = document.getElementById("statusText");
   const msgDiv = document.getElementById("msg");
 
-  // Re-run validation on button click as a final safety measure
   if (!isNameValid(name) || !isContactFormatValid(contact) || !file) {
       alert("Please ensure all fields are filled correctly.");
-      // Force visual errors to show if validation fails on click
       validateAndCheck('name', 'nameErr');
       validateAndCheck('contact', 'contactErr');
       return;
   }
 
-  // --- PROGRESS BAR INITIALIZATION (Ensures progress is visible) ---
+  document.getElementById("uploadBtn").disabled = true;
+  document.getElementById("uploadBtn").innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+  
   document.getElementById("progressArea").style.display = "block";
+  msgDiv.style.display = "none";
   msgDiv.innerHTML = "";
   
-  progressBar.style.background = "#ffaa00"; 
+  progressBar.style.background = "#3b82f6";
   progressBar.style.width = "0%";
-  statusText.innerText = "1. Starting Base64 conversion..."; 
+  statusText.innerText = "1. Preparing document for transmission..."; 
   
   let progress = 0;
   let fake = setInterval(() => {
     progress = Math.min(progress + Math.random() * 5, 95); 
     progressBar.style.width = progress + "%";
-    statusText.innerText = `2. Uploading Data... ${Math.round(progress)}%`; 
+    statusText.innerText = `2. Sending data to server... ${Math.round(progress)}%`; 
     if (progress >= 95) clearInterval(fake);
   }, 150);
 
   try {
     const base64 = await toBase64(file);
     
-    statusText.innerText = "3. Awaiting Server Response..."; 
+    statusText.innerText = "3. Awaiting server confirmation..."; 
 
     const response = await fetch(scriptURL, {
       method: "POST",
@@ -295,18 +460,23 @@ async function upload() {
     
     // SUCCESS STATE 
     clearInterval(fake);
-    progressBar.style.background = "#00cc00";
+    progressBar.style.background = "#10b981";
     progressBar.style.width = "100%";
-    statusText.innerText = "Upload Complete ✔";
-    msgDiv.innerHTML = msg;
+    statusText.innerText = "Upload Complete! Server confirmed receipt ✔";
+    msgDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
+    msgDiv.style.display = "block";
     
   } catch(err) {
     // FAILURE STATE
     clearInterval(fake);
-    progressBar.style.background = "#cc0000";
+    progressBar.style.background = "#ef4444";
     progressBar.style.width = "100%";
-    statusText.innerText = "Upload Failed ❌";
-    msgDiv.innerHTML = "Upload Failed ❌<br>" + err;
+    statusText.innerText = "Upload Failed ❌ Please try again.";
+    msgDiv.innerHTML = `<i class="fas fa-times-circle"></i> Upload Failed: ${err}`;
+    msgDiv.style.display = "block";
+  } finally {
+      document.getElementById("uploadBtn").disabled = false;
+      document.getElementById("uploadBtn").innerHTML = '<i class="fas fa-paper-plane"></i> SUBMIT DOCUMENT';
   }
 }
 
