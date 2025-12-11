@@ -286,11 +286,11 @@ label {
             <div class="file-upload-box">
                 <div class="file-icon"><i class="fas fa-cloud-upload-alt"></i></div>
                 <div class="file-text">Click or Drag file here</div>
-                <div class="file-info">Only **.PDF** format accepted (Max 10MB)</div>
-                <input id="file" type="file" accept="application/pdf" onchange="check()">
+                <div class="file-info">Only **.PDF** format accepted (Max 3MB)</div>
+                <input id="file" type="file" accept="application/pdf" onchange="handleFileSelection(event)">
             </div>
             <div id="fileNameDisplay">
-                <span>Selected File:</span>
+                <span id="fileName">Selected File:</span>
                 <span id="fileSize"></span>
             </div>
         </div>
@@ -314,6 +314,7 @@ label {
 
 <script>
 const scriptURL = "https://script.google.com/macros/s/AKfycbyn6zw19HiWmt58b4YTOhN28lNU9s13cel0BnAEHHztSBzjSuTfuN6R5p34BEtsyIOTqA/exec";
+const MAX_SIZE_BYTES = 3 * 1024 * 1024; // 3 MB
 
 // --- NEW HELPER FUNCTION: Formats bytes into human-readable size (KB, MB) ---
 function formatBytes(bytes, decimals = 2) {
@@ -325,44 +326,82 @@ function formatBytes(bytes, decimals = 2) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
-// --- Contact Input Cleaning (Retained) ---
+// --- Contact Input Cleaning ---
 function cleanContactInput(input) {
     input.value = input.value.replace(/\D/g, '').substring(0, 10);
 }
 
-// Helper validation functions (Retained)
+// Helper validation functions
 const isNameValid = (value) => value.length > 0;
 const isContactFormatValid = (value) => value.replace(/\D/g, '').length === 10;
+
+// --- HANDLE FILE SELECTION (single point) ---
+function handleFileSelection(event) {
+    const input = event.target;
+    const file = input.files[0];
+
+    // If no file selected, just run check() to toggle button
+    if (!file) {
+        document.getElementById('fileNameDisplay').style.display = 'none';
+        check();
+        return;
+    }
+
+    // Validate MIME type (application/pdf) and extension fallback
+    const fileName = file.name || '';
+    const ext = fileName.split('.').pop().toLowerCase();
+
+    if (file.type !== 'application/pdf' && ext !== 'pdf') {
+        alert('Only PDF files are allowed. Please select a .pdf file.');
+        input.value = '';
+        document.getElementById('fileNameDisplay').style.display = 'none';
+        check();
+        return;
+    }
+
+    // Validate file size
+    if (file.size > MAX_SIZE_BYTES) {
+        alert('File size must be under 3 MB. Please choose a smaller file.');
+        input.value = '';
+        document.getElementById('fileNameDisplay').style.display = 'none';
+        check();
+        return;
+    }
+
+    // All good -> display file info
+    document.getElementById('fileName').textContent = `Selected File: ${fileName}`;
+    document.getElementById('fileSize').textContent = formatBytes(file.size);
+    document.getElementById('fileNameDisplay').style.display = 'flex';
+
+    check();
+}
 
 // --- CORE VALIDATION AND BUTTON CHECK ---
 function check() {
   const name = document.getElementById("name").value.trim();
   const contact = document.getElementById("contact").value.trim();
   const fileInput = document.getElementById("file");
-  const fileNameDisplay = document.getElementById('fileNameDisplay');
-  const fileSizeDisplay = document.getElementById('fileSize');
-  
+
   const fileSelected = fileInput.files.length > 0;
-  
-  const isNameOk = isNameValid(name);
-  const isContactOk = isContactFormatValid(contact);
-  
-  // --- UPDATED: Display file name and size ---
+  let isFileOk = false;
+
   if (fileSelected) {
-      const file = fileInput.files[0];
-      fileNameDisplay.querySelector('span:first-child').textContent = `Selected File: ${file.name}`;
-      fileSizeDisplay.textContent = formatBytes(file.size); // Format and display size
-      fileNameDisplay.style.display = 'flex'; // Show both elements
-  } else {
-      fileNameDisplay.style.display = 'none';
-      fileSizeDisplay.textContent = '';
+    const file = fileInput.files[0];
+    // Re-validate file safety in case browser didn't run onchange
+    if (file.type === 'application/pdf' || file.name.split('.').pop().toLowerCase() === 'pdf') {
+      if (file.size <= MAX_SIZE_BYTES) {
+        isFileOk = true;
+      }
+    }
   }
 
-  // Enable button only if all validation passes
-  document.getElementById("uploadBtn").disabled = !(isNameOk && isContactOk && fileSelected);
+  const isNameOk = isNameValid(name);
+  const isContactOk = isContactFormatValid(contact);
+
+  document.getElementById("uploadBtn").disabled = !(isNameOk && isContactOk && isFileOk);
 }
 
-// --- SIMPLIFIED INLINE VALIDATION & ERROR DISPLAY (Retained) ---
+// --- INLINE VALIDATION & ERROR DISPLAY ---
 function validateAndCheck(inputId, errorId) {
     const input = document.getElementById(inputId);
     const errorElement = document.getElementById(errorId);
@@ -388,7 +427,7 @@ function validateAndCheck(inputId, errorId) {
     check(); 
 }
 
-// --- ATTACH BLUR LISTENERS (Retained) ---
+// Attach blur listeners and initial check
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('name').addEventListener('blur', () => {
         validateAndCheck('name', 'nameErr');
@@ -406,84 +445,119 @@ document.addEventListener('DOMContentLoaded', () => {
     check();
 });
 
-
-// --- UPLOAD FUNCTION (Retained) ---
+// --- UPLOAD FUNCTION ---
 async function upload() {
   const name = document.getElementById("name").value.trim();
   const contact = document.getElementById("contact").value.trim();
-  const file = document.getElementById("file").files[0];
+  const fileInput = document.getElementById("file");
+  const file = fileInput.files[0];
   const progressBar = document.getElementById("progressBar");
   const statusText = document.getElementById("statusText");
   const msgDiv = document.getElementById("msg");
+  const uploadBtn = document.getElementById("uploadBtn");
 
+  // Final validation before upload
   if (!isNameValid(name) || !isContactFormatValid(contact) || !file) {
-      alert("Please ensure all fields are filled correctly.");
+      alert("Please ensure all fields are filled correctly and a valid file is selected.");
       validateAndCheck('name', 'nameErr');
       validateAndCheck('contact', 'contactErr');
+      check();
       return;
   }
 
-  document.getElementById("uploadBtn").disabled = true;
-  document.getElementById("uploadBtn").innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-  
+  // Extra safety: enforce size & type again
+  if (file.size > MAX_SIZE_BYTES) {
+      alert("File must be under 3 MB.");
+      return;
+  }
+  if (file.type !== 'application/pdf' && file.name.split('.').pop().toLowerCase() !== 'pdf') {
+      alert("Only PDF files are allowed.");
+      return;
+  }
+
+  // Disable UI while uploading
+  uploadBtn.disabled = true;
+  uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
   document.getElementById("progressArea").style.display = "block";
   msgDiv.style.display = "none";
   msgDiv.innerHTML = "";
-  
   progressBar.style.background = "#3b82f6";
   progressBar.style.width = "0%";
-  statusText.innerText = "1. Preparing document for transmission..."; 
-  
+  statusText.innerText = "1. Preparing document for transmission...";
+
   let progress = 0;
-  let fake = setInterval(() => {
-    progress = Math.min(progress + Math.random() * 5, 95); 
+  const fakeInterval = setInterval(() => {
+    progress = Math.min(progress + Math.random() * 6, 92);
     progressBar.style.width = progress + "%";
-    statusText.innerText = `2. Sending data to server... ${Math.round(progress)}%`; 
-    if (progress >= 95) clearInterval(fake);
-  }, 150);
+    statusText.innerText = `2. Sending data to server... ${Math.round(progress)}%`;
+    if (progress >= 92) clearInterval(fakeInterval);
+  }, 160);
 
   try {
     const base64 = await toBase64(file);
-    
-    statusText.innerText = "3. Awaiting server confirmation..."; 
 
+    statusText.innerText = "3. Awaiting server confirmation...";
+
+    // Send to Google Apps Script endpoint
     const response = await fetch(scriptURL, {
       method: "POST",
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify({
         name: name,
         contact: contact,
+        fileName: file.name,
+        fileType: file.type || 'application/pdf',
         file: base64
       })
     });
 
     const msg = await response.text();
-    
-    // SUCCESS STATE 
-    clearInterval(fake);
+
+    // SUCCESS STATE
+    clearInterval(fakeInterval);
     progressBar.style.background = "#10b981";
     progressBar.style.width = "100%";
     statusText.innerText = "Upload Complete! Server confirmed receipt ✔";
     msgDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
     msgDiv.style.display = "block";
-    
+
+    // CLEAR file input & display to avoid duplicates
+    fileInput.value = "";
+    document.getElementById('fileNameDisplay').style.display = 'none';
+    document.getElementById('fileName').textContent = 'Selected File:';
+    document.getElementById('fileSize').textContent = '';
+
+    // Optionally clear name/contact if you want (commented out)
+    // document.getElementById("name").value = "";
+    // document.getElementById("contact").value = "";
+
   } catch(err) {
     // FAILURE STATE
-    clearInterval(fake);
+    clearInterval(fakeInterval);
     progressBar.style.background = "#ef4444";
     progressBar.style.width = "100%";
     statusText.innerText = "Upload Failed ❌ Please try again.";
     msgDiv.innerHTML = `<i class="fas fa-times-circle"></i> Upload Failed: ${err}`;
     msgDiv.style.display = "block";
   } finally {
-      document.getElementById("uploadBtn").disabled = false;
-      document.getElementById("uploadBtn").innerHTML = '<i class="fas fa-paper-plane"></i> SUBMIT DOCUMENT';
+    // Restore button and run final check (button will remain disabled until valid)
+    uploadBtn.disabled = false;
+    uploadBtn.innerHTML = '<i class="fas fa-paper-plane"></i> SUBMIT DOCUMENT';
+    check(); // ensure upload button state reflects current fields (file cleared)
   }
 }
 
+// Convert file to Base64 (returns only payload, no data URI prefix)
 function toBase64(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => resolve(reader.result.split(",")[1]);
+    reader.onload = () => {
+      // reader.result is like "data:application/pdf;base64,AAAA..."
+      const parts = reader.result.split(',');
+      resolve(parts[1]);
+    };
     reader.onerror = error => reject(error);
     reader.readAsDataURL(file);
   });
