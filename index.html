@@ -289,7 +289,6 @@ label {
     cursor: pointer;
     transition: background 0.3s;
     width: 100%;
-    margin-top: 10px; /* Separator for multiple buttons */
 }
 
 .modal-btn.success {
@@ -380,7 +379,9 @@ label {
         <button id="uploadBtn" class="submit-btn" disabled onclick="upload()">
             <i class="fas fa-paper-plane"></i> SUBMIT DOCUMENT
         </button>
-    </div>
+
+        </div>
+
 </div>
 
 <div id="statusModal" class="modal-overlay" onclick="handleModalClose()">
@@ -435,7 +436,6 @@ function resetModalToLoading() {
     document.getElementById('successBtn').style.display = 'none';
     document.getElementById('retryBtn').style.display = 'none';
     document.getElementById('cancelBtn').style.display = 'block';
-    document.getElementById('cancelBtn').innerText = 'Cancel';
 }
 
 function handleModalClose() {
@@ -469,56 +469,37 @@ function retryUpload() {
     upload(); // Restart the upload process
 }
 
-function showFinalStatus(isSuccess, message, file, allowRetry = true) {
+function showFinalStatus(isSuccess, message, file) {
     if (fakeInterval) clearInterval(fakeInterval);
 
     const title = document.getElementById('modalTitle');
     const icon = document.getElementById('statusIcon');
     const finalMessage = document.getElementById('finalMessage');
-    const retryBtn = document.getElementById('retryBtn');
 
     document.getElementById('progressDetails').style.display = 'none';
     document.getElementById('statusText').style.display = 'none';
     finalMessage.style.display = 'block';
     
     if (isSuccess) {
-        // --- SUCCESS STATE ---
         title.innerText = 'Submission Successful!';
         icon.innerHTML = '<i class="fas fa-check-circle"></i>';
         icon.className = 'status-icon success';
-        
-        // Display server response (which includes the code/filename)
-        finalMessage.innerHTML = message; 
-
+        finalMessage.innerHTML = `**${message}**<br><br>File: ${file.name}<br>Size: ${formatBytes(file.size)}`;
         document.getElementById('successBtn').style.display = 'block';
         document.getElementById('cancelBtn').style.display = 'none';
-        retryBtn.style.display = 'none';
 
         // Clear form inputs on SUCCESS
         document.getElementById("name").value = '';
         document.getElementById("contact").value = '';
         document.getElementById("file").value = ''; 
     } else {
-        // --- FAILURE/REJECTION STATE ---
         title.innerText = 'Submission Failed!';
         icon.innerHTML = '<i class="fas fa-times-circle"></i>';
         icon.className = 'status-icon error';
-
-        finalMessage.innerHTML = message;
-
-        // Show Retry button if allowed (e.g., network error)
-        if (allowRetry) {
-             retryBtn.style.display = 'block';
-             document.getElementById('cancelBtn').innerText = 'Close'; // Change button text
-        } else {
-             retryBtn.style.display = 'none'; // No retry for duplicate/validation errors
-             document.getElementById('cancelBtn').innerText = 'Close';
-        }
-
-        document.getElementById('successBtn').style.display = 'none';
-        document.getElementById('cancelBtn').style.display = 'block'; 
-        
-        // Do NOT clear form inputs on failure/rejection
+        finalMessage.innerHTML = `**Error:** ${message}<br><br>Please check connection and try again.`;
+        document.getElementById('retryBtn').style.display = 'block';
+        document.getElementById('cancelBtn').style.display = 'block'; // Allow cancellation/closing of modal
+        document.getElementById('cancelBtn').innerText = 'Close';
     }
 }
 // ----------------------------
@@ -630,9 +611,10 @@ async function upload() {
   const file = fileInput.files[0];
   const uploadBtn = document.getElementById("uploadBtn");
   
-  // Final checks
+  // Final checks (should be covered by disabled button, but safe to check)
   if (!isNameValid(name) || !isContactFormatValid(contact) || !file || file.size > MAX_FILE_SIZE_BYTES) {
-      showFinalStatus(false, "Pre-flight validation failed. Please check form inputs and file size.", file, false);
+      // If validation fails just before upload (e.g., race condition), use error status.
+      showFinalStatus(false, "Pre-flight validation failed. Please check form inputs and file size.", file);
       return;
   }
   
@@ -654,10 +636,9 @@ async function upload() {
   
   // 3. Fake Progress Simulation (for UX)
   fakeInterval = setInterval(() => {
-    // Increment progress faster towards the beginning, slower near the end
-    progress = Math.min(progress + (Math.random() * (progress < 50 ? 6 : 3)), 95); 
+    progress = Math.min(progress + Math.random() * 5, 95); 
     
-    // Calculate estimated speed
+    // Calculate estimated speed (fake speed, as real upload is delayed until base64 conversion)
     let elapsedSeconds = (Date.now() - uploadStartTime) / 1000;
     let uploadedPercentage = progress / 100;
     let uploadedDataMB = fileSizeMB * uploadedPercentage;
@@ -674,7 +655,7 @@ async function upload() {
     const base64 = await toBase64(file);
     
     document.getElementById('statusText').innerText = "3. Awaiting server confirmation..."; 
-    document.getElementById('progressBar').style.width = "99%"; 
+    document.getElementById('progressBar').style.width = "99%"; // Max out fake progress
 
     const response = await fetch(scriptURL, {
       method: "POST",
@@ -683,3 +664,17 @@ async function upload() {
         contact: contact,
         file: base64
       })
+    });
+
+    const msg = await response.text(); 
+    
+    // SUCCESS STATE 
+    document.getElementById('progressBar').style.width = "100%";
+    document.getElementById('progressBar').style.background = 'var(--secondary-color)';
+    showFinalStatus(true, msg, file);
+    
+  } catch(err) {
+    // FAILURE STATE (Network/Server Error)
+    document.getElementById('progressBar').style.width = "100%";
+    document.getElementById('progressBar').style.background = 'var(--error-color)';
+    showFinalStatus(false, er
