@@ -142,7 +142,7 @@ label {
     font-size: 14px;
     font-weight: 600;
     color: var(--secondary-color);
-    display: flex; /* Use flex to align name and size */
+    display: flex; /* Ensures file name and size display side-by-side */
     justify-content: space-between;
     align-items: center;
     padding: 5px 0;
@@ -212,7 +212,7 @@ label {
 
 .modal-content {
     background: white;
-    padding: 30px; /* Slightly reduced padding */
+    padding: 30px; 
     border-radius: 12px;
     text-align: center;
     max-width: 90%;
@@ -289,6 +289,7 @@ label {
     cursor: pointer;
     transition: background 0.3s;
     width: 100%;
+    margin-top: 10px; /* Separator for multiple buttons */
 }
 
 .modal-btn.success {
@@ -379,9 +380,7 @@ label {
         <button id="uploadBtn" class="submit-btn" disabled onclick="upload()">
             <i class="fas fa-paper-plane"></i> SUBMIT DOCUMENT
         </button>
-
-        </div>
-
+    </div>
 </div>
 
 <div id="statusModal" class="modal-overlay" onclick="handleModalClose()">
@@ -412,11 +411,23 @@ label {
         </div>
     </div>
 </div>
+
 <script>
+// NOTE: Ensure this scriptURL is correct and points to your DEPLOYED Apps Script endpoint.
 const scriptURL = "https://script.google.com/macros/s/AKfycbyn6zw19HiWmt58b4YTOhN28lNU9s13cel0BnAEHHztSBzjSuTfuN6R5p34BEtsyIOTqA/exec";
 const MAX_FILE_SIZE_BYTES = 3 * 1024 * 1024; // 3 MB
 
 let fakeInterval = null;
+
+// --- UTILITY FUNCTION ---
+function formatBytes(bytes, decimals = 2) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
 
 // --- MODAL CONTROL FUNCTIONS ---
 
@@ -436,10 +447,10 @@ function resetModalToLoading() {
     document.getElementById('successBtn').style.display = 'none';
     document.getElementById('retryBtn').style.display = 'none';
     document.getElementById('cancelBtn').style.display = 'block';
+    document.getElementById('cancelBtn').innerText = 'Cancel';
 }
 
 function handleModalClose() {
-    // Only allow closure if successful (or if the user clicks retry/cancel buttons inside)
     if (document.getElementById('successBtn').style.display === 'block') {
         closeStatusModal();
     }
@@ -452,7 +463,6 @@ function closeStatusModal() {
     setTimeout(() => {
         modal.style.display = 'none';
     }, 300);
-    // Ensure button state is updated after closing modal
     check(); 
 }
 
@@ -465,66 +475,71 @@ function cancelUpload() {
 }
 
 function retryUpload() {
-    closeStatusModal(); // This clears the interval and closes the modal
+    closeStatusModal(); 
     upload(); // Restart the upload process
 }
 
-function showFinalStatus(isSuccess, message, file) {
+function showFinalStatus(isSuccess, message, file, allowRetry = true) {
     if (fakeInterval) clearInterval(fakeInterval);
 
     const title = document.getElementById('modalTitle');
     const icon = document.getElementById('statusIcon');
     const finalMessage = document.getElementById('finalMessage');
+    const retryBtn = document.getElementById('retryBtn');
 
     document.getElementById('progressDetails').style.display = 'none';
     document.getElementById('statusText').style.display = 'none';
     finalMessage.style.display = 'block';
     
     if (isSuccess) {
+        // --- SUCCESS STATE ---
         title.innerText = 'Submission Successful!';
         icon.innerHTML = '<i class="fas fa-check-circle"></i>';
         icon.className = 'status-icon success';
-        finalMessage.innerHTML = `**${message}**<br><br>File: ${file.name}<br>Size: ${formatBytes(file.size)}`;
+        finalMessage.innerHTML = message; 
+
         document.getElementById('successBtn').style.display = 'block';
         document.getElementById('cancelBtn').style.display = 'none';
+        retryBtn.style.display = 'none';
 
         // Clear form inputs on SUCCESS
         document.getElementById("name").value = '';
         document.getElementById("contact").value = '';
         document.getElementById("file").value = ''; 
     } else {
+        // --- FAILURE/REJECTION STATE ---
         title.innerText = 'Submission Failed!';
         icon.innerHTML = '<i class="fas fa-times-circle"></i>';
         icon.className = 'status-icon error';
-        finalMessage.innerHTML = `**Error:** ${message}<br><br>Please check connection and try again.`;
-        document.getElementById('retryBtn').style.display = 'block';
-        document.getElementById('cancelBtn').style.display = 'block'; // Allow cancellation/closing of modal
-        document.getElementById('cancelBtn').innerText = 'Close';
+
+        finalMessage.innerHTML = message;
+
+        if (allowRetry) {
+             retryBtn.style.display = 'block';
+             document.getElementById('cancelBtn').innerText = 'Close';
+        } else {
+             retryBtn.style.display = 'none'; 
+             document.getElementById('cancelBtn').innerText = 'Close';
+        }
+
+        document.getElementById('successBtn').style.display = 'none';
+        document.getElementById('cancelBtn').style.display = 'block'; 
+        
+        // Do NOT clear form inputs on failure/rejection
     }
 }
 // ----------------------------
 
 
-// --- NEW HELPER FUNCTION: Formats bytes into human-readable size (KB, MB) ---
-function formatBytes(bytes, decimals = 2) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-}
-
-// --- Contact Input Cleaning (Retained) ---
+// --- VALIDATION AND INPUT CLEANING ---
 function cleanContactInput(input) {
     input.value = input.value.replace(/\D/g, '').substring(0, 10);
 }
 
-// Helper validation functions (Retained)
 const isNameValid = (value) => value.length > 0;
 const isContactFormatValid = (value) => value.replace(/\D/g, '').length === 10;
 
-// --- CORE VALIDATION AND BUTTON CHECK (RETAINED) ---
+// *** CHECK FUNCTION FIXED TO CORRECTLY HANDLE FILE DISPLAY ***
 function check() {
   const name = document.getElementById("name").value.trim();
   const contact = document.getElementById("contact").value.trim();
@@ -554,8 +569,10 @@ function check() {
       // 2. Display File Info
       fileNameDisplay.querySelector('span:first-child').textContent = `Selected File: ${file.name}`;
       fileSizeDisplay.textContent = formatBytes(file.size); 
+      // THIS IS THE CRITICAL LINE: Display the selected file info block
       fileNameDisplay.style.display = 'flex'; 
   } else {
+      // Hide file info if no file is selected
       fileNameDisplay.style.display = 'none';
       fileSizeDisplay.textContent = '';
       fileSizeErr.style.display = 'none'; 
@@ -564,7 +581,6 @@ function check() {
   document.getElementById("uploadBtn").disabled = !(isNameOk && isContactOk && fileSelected && isFileSizeOk);
 }
 
-// --- SIMPLIFIED INLINE VALIDATION & ERROR DISPLAY (RETAINED) ---
 function validateAndCheck(inputId, errorId) {
     const input = document.getElementById(inputId);
     const errorElement = document.getElementById(errorId);
@@ -590,7 +606,8 @@ function validateAndCheck(inputId, errorId) {
     check(); 
 }
 
-// --- ATTACH BLUR LISTENERS (RETAINED) ---
+
+// --- EVENT LISTENERS ---
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('name').addEventListener('blur', () => {
         validateAndCheck('name', 'nameErr');
@@ -603,7 +620,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// --- UPLOAD FUNCTION (UPDATED FOR DYNAMIC MODAL) ---
+// --- UPLOAD CORE LOGIC ---
 async function upload() {
   const name = document.getElementById("name").value.trim();
   const contact = document.getElementById("contact").value.trim();
@@ -611,10 +628,8 @@ async function upload() {
   const file = fileInput.files[0];
   const uploadBtn = document.getElementById("uploadBtn");
   
-  // Final checks (should be covered by disabled button, but safe to check)
   if (!isNameValid(name) || !isContactFormatValid(contact) || !file || file.size > MAX_FILE_SIZE_BYTES) {
-      // If validation fails just before upload (e.g., race condition), use error status.
-      showFinalStatus(false, "Pre-flight validation failed. Please check form inputs and file size.", file);
+      showFinalStatus(false, "Pre-flight validation failed. Please check form inputs and file size.", file, false);
       return;
   }
   
@@ -636,9 +651,8 @@ async function upload() {
   
   // 3. Fake Progress Simulation (for UX)
   fakeInterval = setInterval(() => {
-    progress = Math.min(progress + Math.random() * 5, 95); 
+    progress = Math.min(progress + (Math.random() * (progress < 50 ? 6 : 3)), 95); 
     
-    // Calculate estimated speed (fake speed, as real upload is delayed until base64 conversion)
     let elapsedSeconds = (Date.now() - uploadStartTime) / 1000;
     let uploadedPercentage = progress / 100;
     let uploadedDataMB = fileSizeMB * uploadedPercentage;
@@ -655,7 +669,7 @@ async function upload() {
     const base64 = await toBase64(file);
     
     document.getElementById('statusText').innerText = "3. Awaiting server confirmation..."; 
-    document.getElementById('progressBar').style.width = "99%"; // Max out fake progress
+    document.getElementById('progressBar').style.width = "99%"; 
 
     const response = await fetch(scriptURL, {
       method: "POST",
@@ -668,13 +682,48 @@ async function upload() {
 
     const msg = await response.text(); 
     
-    // SUCCESS STATE 
-    document.getElementById('progressBar').style.width = "100%";
-    document.getElementById('progressBar').style.background = 'var(--secondary-color)';
-    showFinalStatus(true, msg, file);
+    // --- CRITICAL LOGIC: CHECK FOR DUPLICATE REJECTION ---
+    const rejectionPhrase = "❌ **Document Already Submitted** ❌";
+    const isSuccess = !msg.includes(rejectionPhrase); 
+    
+    clearInterval(fakeInterval);
+
+    if (isSuccess) {
+        // ACTUAL SUCCESS
+        document.getElementById('progressBar').style.width = "100%";
+        document.getElementById('progressBar').style.background = 'var(--secondary-color)';
+        showFinalStatus(true, msg, file, false);
+    } else {
+        // INTENTIONAL FAILURE (Duplicate Rejection from Server)
+        document.getElementById('progressBar').style.width = "100%";
+        document.getElementById('progressBar').style.background = 'var(--error-color)';
+        showFinalStatus(false, msg, file, false); // No retry option for duplicates
+    }
     
   } catch(err) {
-    // FAILURE STATE (Network/Server Error)
+    // NETWORK/SERVER FAILURE
+    clearInterval(fakeInterval);
     document.getElementById('progressBar').style.width = "100%";
     document.getElementById('progressBar').style.background = 'var(--error-color)';
-    showFinalStatus(false, er
+    // Offer retry for network/connection errors
+    showFinalStatus(false, err.message || 'Network connection or server error. Please check your connection.', file, true); 
+    
+  } finally {
+      // Clean up UI, re-enable button
+      uploadBtn.disabled = false;
+      uploadBtn.innerHTML = '<i class="fas fa-paper-plane"></i> SUBMIT DOCUMENT';
+  }
+}
+
+function toBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(",")[1]);
+    reader.onerror = error => reject(error);
+    reader.readAsDataURL(file);
+  });
+}
+</script>
+
+</body>
+</html>
