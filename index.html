@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -357,10 +358,11 @@ label {
         </div>
 
         <div class="form-group">
-            <label for="applicationId"><i class="fas fa-id-card"></i> Application ID</label>
-            <input id="applicationId" type="tel" inputmode="numeric" pattern="[0-9]{9}" maxlength="9" class="input-field" oninput="cleanContactInput(this); validateAndCheck('applicationId', 'applicationIdErr')">
-            <div id="applicationIdErr" class="error">Application ID must be exactly 9 digits.</div>
+            <label for="contact"><i class="fas fa-phone-alt"></i> Contact Number</label>
+            <input id="contact" type="tel" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" class="input-field" oninput="cleanContactInput(this); validateAndCheck('contact', 'contactErr')">
+            <div id="contactErr" class="error">Contact number must be exactly 10 digits.</div>
         </div>
+
         <div class="form-group">
             <label for="file"><i class="fas fa-file-pdf"></i> Select PDF Document</label>
             <div class="file-upload-box">
@@ -503,7 +505,7 @@ function showFinalStatus(isSuccess, message, file, allowRetry = true) {
 
         // Clear form inputs on SUCCESS
         document.getElementById("name").value = '';
-        document.getElementById("applicationId").value = ''; // UPDATED ID
+        document.getElementById("contact").value = '';
         document.getElementById("file").value = ''; 
     } else {
         // --- FAILURE/REJECTION STATE ---
@@ -532,19 +534,16 @@ function showFinalStatus(isSuccess, message, file, allowRetry = true) {
 
 // --- VALIDATION AND INPUT CLEANING ---
 function cleanContactInput(input) {
-    // UPDATED: Restrict input to 9 digits
-    input.value = input.value.replace(/\D/g, '').substring(0, 9);
+    input.value = input.value.replace(/\D/g, '').substring(0, 10);
 }
 
 const isNameValid = (value) => value.length > 0;
-// UPDATED: Checks for exactly 9 digits
-const isApplicationIdFormatValid = (value) => value.replace(/\D/g, '').length === 9;
+const isContactFormatValid = (value) => value.replace(/\D/g, '').length === 10;
 
 // *** CHECK FUNCTION FIXED TO CORRECTLY HANDLE FILE DISPLAY ***
 function check() {
   const name = document.getElementById("name").value.trim();
-  // UPDATED: Changed ID to 'applicationId'
-  const applicationId = document.getElementById("applicationId").value.trim();
+  const contact = document.getElementById("contact").value.trim();
   const fileInput = document.getElementById("file");
   const fileNameDisplay = document.getElementById('fileNameDisplay');
   const fileSizeDisplay = document.getElementById('fileSize');
@@ -554,8 +553,7 @@ function check() {
   let isFileSizeOk = true;
   
   const isNameOk = isNameValid(name);
-  // UPDATED: Using new validation function
-  const isApplicationIdOk = isApplicationIdFormatValid(applicationId);
+  const isContactOk = isContactFormatValid(contact);
   
   if (fileSelected) {
       const file = fileInput.files[0];
@@ -572,6 +570,7 @@ function check() {
       // 2. Display File Info
       fileNameDisplay.querySelector('span:first-child').textContent = `Selected File: ${file.name}`;
       fileSizeDisplay.textContent = formatBytes(file.size); 
+      // THIS IS THE CRITICAL LINE: Display the selected file info block
       fileNameDisplay.style.display = 'flex'; 
   } else {
       // Hide file info if no file is selected
@@ -580,8 +579,7 @@ function check() {
       fileSizeErr.style.display = 'none'; 
   }
 
-  // UPDATED: Check for isApplicationIdOk
-  document.getElementById("uploadBtn").disabled = !(isNameOk && isApplicationIdOk && fileSelected && isFileSizeOk);
+  document.getElementById("uploadBtn").disabled = !(isNameOk && isContactOk && fileSelected && isFileSizeOk);
 }
 
 function validateAndCheck(inputId, errorId) {
@@ -591,10 +589,9 @@ function validateAndCheck(inputId, errorId) {
 
     if (inputId === 'name') {
         isValid = isNameValid(input.value.trim());
-    // UPDATED: Check for 'applicationId'
-    } else if (inputId === 'applicationId') {
+    } else if (inputId === 'contact') {
         cleanContactInput(input);
-        isValid = isApplicationIdFormatValid(input.value.trim());
+        isValid = isContactFormatValid(input.value.trim());
     }
     
     if (!isValid) {
@@ -616,9 +613,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('name').addEventListener('blur', () => {
         validateAndCheck('name', 'nameErr');
     });
-    // UPDATED: Listener for 'applicationId'
-    document.getElementById('applicationId').addEventListener('blur', () => {
-        validateAndCheck('applicationId', 'applicationIdErr');
+    document.getElementById('contact').addEventListener('blur', () => {
+        validateAndCheck('contact', 'contactErr');
     });
     
     check();
@@ -628,14 +624,12 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- UPLOAD CORE LOGIC ---
 async function upload() {
   const name = document.getElementById("name").value.trim();
-  // UPDATED: Changed variable and ID to 'applicationId'
-  const applicationId = document.getElementById("applicationId").value.trim();
+  const contact = document.getElementById("contact").value.trim();
   const fileInput = document.getElementById("file");
   const file = fileInput.files[0];
   const uploadBtn = document.getElementById("uploadBtn");
   
-  // UPDATED: Using new validation function
-  if (!isNameValid(name) || !isApplicationIdFormatValid(applicationId) || !file || file.size > MAX_FILE_SIZE_BYTES) {
+  if (!isNameValid(name) || !isContactFormatValid(contact) || !file || file.size > MAX_FILE_SIZE_BYTES) {
       showFinalStatus(false, "Pre-flight validation failed. Please check form inputs and file size.", file, false);
       return;
   }
@@ -682,8 +676,7 @@ async function upload() {
       method: "POST",
       body: JSON.stringify({
         name: name,
-        // UPDATED: Sending 'applicationId' instead of 'contact'
-        applicationId: applicationId,
+        contact: contact,
         file: base64
       })
     });
@@ -734,4 +727,4 @@ function toBase64(file) {
 </script>
 
 </body>
-</html>
+  </html>
